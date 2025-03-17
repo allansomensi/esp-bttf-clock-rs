@@ -112,10 +112,17 @@ fn main() -> Result<(), AppError> {
             })?;
     }
 
-    loop {
-        display::update_display_time(&display).inspect_err(|e| {
-            log::error!("Failed to update display time: {:#?}", e);
-        })?;
+    // Create a thread for updating the time in display
+    std::thread::spawn(move || loop {
+        display::update_display_time(&display.clone())
+            .inspect_err(|e| {
+                log::error!("Failed to update display time: {:#?}", e);
+            })
+            .unwrap();
         FreeRtos::delay_ms(60000);
+    });
+
+    loop {
+        FreeRtos::delay_ms(1000);
     }
 }
