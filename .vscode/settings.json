@@ -1,0 +1,12 @@
+{
+    "conventionalCommits.scopes": [
+        "display",
+        "error",
+        "handler",
+        "led",
+        "server",
+        "time",
+        "utils",
+        "wifi",
+    ]
+}
