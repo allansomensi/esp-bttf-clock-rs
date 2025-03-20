@@ -3,6 +3,11 @@ use crate::{error::AppError, nvs};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{modem::WifiModemPeripheral, peripheral::Peripheral},
+    ipv4::{
+        ClientConfiguration as IpClientConfiguration, Configuration as IpConfiguration,
+        DHCPClientSettings,
+    },
+    netif::{EspNetif, NetifConfiguration, NetifStack},
     nvs::{EspDefaultNvsPartition, EspNvs, NvsDefault},
     sys::esp_restart,
     wifi::{
@@ -82,7 +87,18 @@ fn configure_station(
     ssid: String,
     password: String,
 ) -> Result<EspWifi, AppError> {
-    let mut wifi = EspWifi::wrap(wifi)?;
+    let mut wifi = EspWifi::wrap_all(
+        wifi,
+        EspNetif::new_with_conf(&NetifConfiguration {
+            ip_configuration: Some(IpConfiguration::Client(IpClientConfiguration::DHCP(
+                DHCPClientSettings {
+                    hostname: Some("espclock".try_into().unwrap()),
+                },
+            ))),
+            ..NetifConfiguration::wifi_default_client()
+        })?,
+        EspNetif::new(NetifStack::Ap)?,
+    )?;
 
     let wifi_configuration = WifiConfiguration::Client(ClientConfiguration {
         ssid: ssid.as_str().try_into().unwrap(),
