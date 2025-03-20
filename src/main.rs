@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, prelude::Peripherals},
@@ -152,6 +154,16 @@ fn main() -> Result<(), error::AppError> {
         )
         .inspect_err(|&e| {
             log::error!("Failed to register get_status handler: {:#?}", e);
+        })?;
+
+    web_portal_server
+        .fn_handler(
+            "/factory_reset",
+            Method::Get,
+            server::web_portal::factory_reset(Arc::new(Mutex::new(nvs))),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register sync_time handler: {:#?}", e);
         })?;
 
     unsafe {
