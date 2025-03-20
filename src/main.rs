@@ -79,7 +79,7 @@ fn main() -> Result<(), error::AppError> {
         )?;
 
         // Connect to the Wi-Fi network
-        wifi::station::connect_wifi(&mut wifi_station)?;
+        wifi::station::connect_wifi_or_restart(&mut wifi_station, &mut nvs)?;
 
         wifi_station
     };

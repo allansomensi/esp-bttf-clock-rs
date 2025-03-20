@@ -1,9 +1,10 @@
 use super::get_wifi;
-use crate::error::AppError;
+use crate::{error::AppError, nvs};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{modem::WifiModemPeripheral, peripheral::Peripheral},
-    nvs::EspDefaultNvsPartition,
+    nvs::{EspDefaultNvsPartition, EspNvs, NvsDefault},
+    sys::esp_restart,
     wifi::{
         AuthMethod, BlockingWifi, ClientConfiguration, Configuration as WifiConfiguration, EspWifi,
         WifiDriver,
@@ -96,31 +97,52 @@ fn configure_station(
     Ok(wifi)
 }
 
-/// Starts the Wi-Fi connection process and waits until the device is connected.
+/// Starts and connects to a Wi-Fi network using the provided `wifi` driver.
 ///
-/// This function starts the Wi-Fi connection process, waits for the network interface to be up,
-/// and ensures the device is successfully connected to the network.
+/// This function initializes the Wi-Fi connection, waits for the network interface to be up,
+/// and continuously checks for a successful connection. If the connection fails, it deletes
+/// stored Wi-Fi credentials, stops the Wi-Fi driver, and restarts the device.
 ///
 /// ## Arguments
-/// - `wifi`: A mutable reference to the [BlockingWifi] instance wrapped with [EspWifi]
 ///
-/// ## Returns
-/// - `Result<(), AppError>`: A result indicating success or an error.
+/// - `wifi`: A mutable reference to the [BlockingWifi] driver that manages the Wi-Fi connection.
+/// - `nvs`: A mutable reference to the NVS used to store Wi-Fi credentials.
+///
+/// ## Errors
+/// This function will return an error if any of the following operations fail:
+/// - Starting or connecting the Wi-Fi.
+/// - Waiting for the network interface to come up.
+/// - Connecting to the Wi-Fi network.
 ///
 /// ## Example
+///
 /// ```rust
-/// let mut wifi = get_station(modem, sysloop, nvs, ssid, password).unwrap();
-/// match connect_wifi(&mut wifi) {
-///     Ok(()) => println!("Wi-Fi connected successfully!"),
-///     Err(e) => eprintln!("Failed to connect to Wi-Fi: {:?}", e),
-/// }
+/// let mut wifi = ...; // A properly initialized wifi driver
+/// let mut nvs = ...;  // A properly initialized NVS
+///
+/// connect_wifi(&mut wifi, &mut nvs)?;
 /// ```
-pub fn connect_wifi(wifi: &mut BlockingWifi<EspWifi<'static>>) -> Result<(), AppError> {
+///
+/// # Safety
+/// This function uses `unsafe` to restart the device if the connection process fails.
+pub fn connect_wifi_or_restart(
+    wifi: &mut BlockingWifi<EspWifi<'static>>,
+    nvs: &mut EspNvs<NvsDefault>,
+) -> Result<(), AppError> {
     wifi.start()?;
     log::info!("Wifi started!");
 
-    wifi.connect()?;
-    log::info!("Wifi connected!");
+    match wifi.connect() {
+        Ok(_) => log::info!("Wifi connected!"),
+        Err(_) => {
+            log::error!("Failed to connect to Wi-Fi! Restarting...");
+            nvs::delete_wifi_credentials(nvs);
+            wifi.stop()?;
+            unsafe {
+                esp_restart();
+            }
+        }
+    };
 
     wifi.wait_netif_up()?;
     log::info!("Wifi netif up!");
