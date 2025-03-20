@@ -1,11 +1,20 @@
 use chrono::{DateTime, Timelike, Utc};
-use chrono_tz::{America, Tz};
-use std::time::SystemTime;
+use chrono_tz::Tz;
+use std::{
+    sync::{Arc, Mutex},
+    time::SystemTime,
+};
 
 pub mod sntp;
 
-/// Static constant representing the timezone.
-pub static TIMEZONE: Tz = America::Sao_Paulo;
+lazy_static::lazy_static! {
+    /// Global static reference for storing the Timezone.
+    ///
+    /// This global reference uses `lazy_static` to initialize a `Arc<Mutex>` that holds an
+    /// `Option<Tz>`. It can be used across the application to store and retrieve
+    /// the Timezone in a thread-safe manner.
+    pub static ref TIMEZONE: Arc<Mutex<Option<Tz>>> = Arc::new(Mutex::new(Some(Tz::UTC)));
+}
 
 /// Retrieves the current time formatted as a vector of digits representing the hour and minute.
 ///
@@ -21,7 +30,7 @@ pub static TIMEZONE: Tz = America::Sao_Paulo;
 /// ```
 pub fn get_time() -> Vec<u8> {
     let now_utc: DateTime<Utc> = SystemTime::now().into();
-    let now = now_utc.with_timezone(&TIMEZONE);
+    let now = now_utc.with_timezone(&TIMEZONE.lock().unwrap().unwrap());
     let hour = now.hour();
     let minute = now.minute();
 

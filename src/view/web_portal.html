@@ -88,13 +88,41 @@
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            populateTimezones();
             document.getElementById('digitsInput').value = '';
             document.getElementById('brightnessInput').value = '';
             document.getElementById('themeSelect').value = 'orange';
             document.getElementById('themeSelect').addEventListener('change', setTheme);
         });
 
-        function sendDigits() {
+        function populateTimezones() {
+            const timezones = [
+                "UTC", "America/New_York", "America/Sao_Paulo", "Europe/London", "Europe/Berlin", "Asia/Tokyo", "Australia/Sydney"
+            ];
+            const tzSelect = document.getElementById("tzSelect");
+            timezones.forEach(tz => {
+                let option = document.createElement("option");
+                option.value = tz;
+                option.textContent = tz;
+                tzSelect.appendChild(option);
+            });
+        }
+
+        function setTimezone() {
+            let timezone = document.getElementById("tzSelect").value;
+            if (timezone) {
+                fetch('/set_timezone?' + encodeURIComponent(timezone), { method: 'GET' })
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('message').innerText = "Timezone set to: " + timezone;
+                    })
+                    .catch(error => console.error('Error setting timezone:', error));
+            } else {
+                alert("Please select a timezone.");
+            }
+        }
+
+        function setDigits() {
             let digits = document.getElementById('digitsInput').value;
             if (digits) {
                 fetch('/set_digits?' + encodeURIComponent(digits), {
@@ -201,10 +229,10 @@
         <h2>Display</h2>
         <div class="row">
             <input type="text" id="digitsInput" placeholder="Enter digits" autocomplete="off">
-            <button onclick="sendDigits()">Send Digits</button>
+            <button onclick="setDigits()">Set Digits</button>
         </div>
         <div class="row">
-            <input type="number" id="brightnessInput" placeholder="Brightness (1-7)" min="1" max="7" autocomplete="off">
+            <input type="number" id="brightnessInput" placeholder="Brightness (0-7)" min="0" max="7" autocomplete="off">
             <button onclick="setBrightness()">Set Brightness</button>
         </div>
 
@@ -230,6 +258,13 @@
             <p><strong>SSID:</strong> <span id="ssid">Loading...</span></p>
             <p><strong>Time Zone:</strong> <span id="timezone">Loading...</span></p>
             <p><strong>Time:</strong> <span id="time">Loading...</span></p>
+        </div>
+
+        <!-- Timezone Selector -->
+        <h2>Set Timezone</h2>
+        <div class="row">
+            <select id="tzSelect"></select>
+            <button onclick="setTimezone()">Set Timezone</button>
         </div>
 
         <!-- Factory Reset Button -->

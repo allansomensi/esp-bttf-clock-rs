@@ -178,6 +178,16 @@ fn main() -> Result<(), error::AppError> {
             log::error!("Failed to register sync_time handler: {:#?}", e);
         })?;
 
+    web_portal_server
+        .fn_handler(
+            "/set_timezone",
+            Method::Get,
+            server::web_portal::set_timezone(),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register set_timezone handler: {:#?}", e);
+        })?;
+
     unsafe {
         web_portal_server
             .fn_handler_nonstatic(

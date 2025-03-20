@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use crate::{
     error::AppError,
     module::{
@@ -7,9 +5,10 @@ use crate::{
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
-    time::{self, sntp::Sntp},
+    time::{self, sntp::Sntp, TIMEZONE},
     util,
 };
+use chrono_tz::Tz;
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
     http::server::{EspHttpConnection, Request},
@@ -17,6 +16,7 @@ use esp_idf_svc::{
     sntp::SyncStatus,
     sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
+use std::sync::{Arc, Mutex};
 
 /// Generates the web portal page response for the HTTP request.
 ///
@@ -46,7 +46,7 @@ pub fn get_status(
     wifi_ssid: String,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let timezone = time::TIMEZONE;
+        let timezone = time::TIMEZONE.lock().unwrap().unwrap();
         let time = time::get_time();
         let wifi_ssid = wifi_ssid.as_str();
 
@@ -91,6 +91,35 @@ pub fn factory_reset(
             esp_wifi_disconnect();
             esp_restart();
         }
+    }
+}
+
+pub fn set_timezone() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |request: Request<&mut EspHttpConnection<'_>>| {
+        let url = request.uri();
+
+        if let Some(start) = url.find('?') {
+            let tz_value = &url[start + 1..];
+
+            match tz_value.parse::<Tz>() {
+                Ok(timezone) => {
+                    let mut timezone_value = TIMEZONE.lock().unwrap();
+                    *timezone_value = Some(timezone);
+
+                    log::info!("Timezone changed to: {timezone}");
+                }
+                Err(_) => {
+                    log::warn!("Invalid timezone: {tz_value}");
+                    return Err(AppError::Server("Invalid timezone".to_string()));
+                }
+            }
+        }
+
+        request
+            .into_ok_response()?
+            .write("Timezone Updated!".as_bytes())?;
+
+        Ok::<(), AppError>(())
     }
 }
 
