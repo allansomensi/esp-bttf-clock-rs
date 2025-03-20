@@ -1,8 +1,15 @@
+use std::net::Ipv4Addr;
+
 use super::get_wifi;
 use crate::error::AppError;
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{modem::WifiModemPeripheral, peripheral::Peripheral},
+    ipv4::{
+        ClientConfiguration as IpClientConfiguration, ClientSettings as IpClientSettings,
+        Configuration as IpConfiguration,
+    },
+    netif::{EspNetif, NetifConfiguration, NetifStack},
     nvs::EspDefaultNvsPartition,
     wifi::{
         AccessPointConfiguration, AuthMethod, BlockingWifi, Configuration as WifiConfiguration,
@@ -68,7 +75,20 @@ where
 /// let wifi_ap = configure_ap(wifi_driver)?;
 /// ```
 fn configure_ap(wifi_ap: WifiDriver) -> Result<EspWifi, AppError> {
-    let mut wifi_ap = EspWifi::wrap(wifi_ap)?;
+    // Test it too
+    let mut wifi_ap = EspWifi::wrap_all(
+        wifi_ap,
+        EspNetif::new_with_conf(&NetifConfiguration {
+            ip_configuration: Some(IpConfiguration::Client(IpClientConfiguration::Fixed(
+                IpClientSettings {
+                    dns: Some(Ipv4Addr::new(192, 168, 71, 1)),
+                    ..Default::default()
+                },
+            ))),
+            ..NetifConfiguration::wifi_default_client()
+        })?,
+        EspNetif::new(NetifStack::Ap)?,
+    )?;
 
     let wifi_configuration = WifiConfiguration::AccessPoint(AccessPointConfiguration {
         ssid: AP_SSID.try_into().unwrap(),

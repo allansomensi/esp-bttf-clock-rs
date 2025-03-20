@@ -8,6 +8,7 @@ use esp_idf_svc::{
     http::Method,
     io::{Read, Write},
 };
+use std::{net::Ipv4Addr, time::Duration};
 
 /// Max payload length
 const MAX_LEN: usize = 128;
@@ -77,6 +78,25 @@ pub fn start_captive_portal() -> Result<(), AppError> {
     while WIFI_CREDENTIALS.lock().unwrap().is_none() {
         std::thread::sleep(std::time::Duration::from_millis(500));
     }
+
+    Ok(())
+}
+
+pub async fn start_dns_server() -> Result<(), AppError> {
+    let stack = edge_nal_std::Stack::new();
+    let mut tx = [0; 1500];
+    let mut rx = [0; 1500];
+
+    edge_captive::io::run(
+        &stack,
+        edge_captive::io::DEFAULT_SOCKET,
+        &mut tx,
+        &mut rx,
+        Ipv4Addr::new(192, 168, 0, 1),
+        Duration::from_secs(0),
+    )
+    .await
+    .unwrap();
 
     Ok(())
 }

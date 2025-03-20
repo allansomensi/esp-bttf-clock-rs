@@ -1,12 +1,12 @@
-use std::sync::{Arc, Mutex};
-
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
-    hal::{delay::FreeRtos, prelude::Peripherals},
+    hal::{delay::FreeRtos, prelude::Peripherals, task::block_on},
     http::Method,
     nvs::{EspDefaultNvsPartition, EspNvs},
     sys::esp_restart,
 };
+use server::captive_portal::start_dns_server;
+use std::sync::{Arc, Mutex};
 
 mod error;
 mod module;
@@ -89,6 +89,9 @@ fn main() -> Result<(), error::AppError> {
     // If the device is in AP mode, start the captive portal to capture credentials
     if is_ap_mode {
         server::captive_portal::start_captive_portal()?;
+
+        // thread::spawn(|| block_on(start_dns_server()).unwrap());  // Test it too
+        block_on(start_dns_server()).unwrap();
 
         // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
