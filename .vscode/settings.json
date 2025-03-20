@@ -1,12 +1,12 @@
 {
     "conventionalCommits.scopes": [
-        "display",
         "error",
-        "handler",
+        "display",
         "led",
         "server",
         "time",
-        "utils",
+        "util",
+        "view",
         "wifi",
     ],
     "material-icon-theme.folders.associations": {

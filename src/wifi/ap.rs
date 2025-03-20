@@ -13,6 +13,24 @@ use esp_idf_svc::{
 const AP_SSID: &str = "esp-clock";
 const AP_PASS: &str = "bttf-rust";
 
+/// Creates and configures an Access Point (AP) mode Wi-Fi instance.
+///
+/// ## Arguments
+///
+/// - `modem`: The Wi-Fi modem peripheral.
+/// - `sysloop`: The system event loop for handling Wi-Fi events.
+/// - `nvs`: Optional Non-Volatile Storage partition for saving Wi-Fi settings.
+///
+/// ## Returns
+///
+/// - `Ok(BlockingWifi<EspWifi>)`: A blocking Wi-Fi instance configured as an Access Point.
+/// - `Err(AppError)`: If there is a failure in setting up the AP.
+///
+/// ## Example
+///
+/// ```rust
+/// let wifi_ap = get_ap(modem, sysloop, nvs)?;
+/// ```
 pub fn get_ap<'d, M>(
     modem: impl Peripheral<P = M> + 'd,
     sysloop: EspSystemEventLoop,
@@ -28,6 +46,27 @@ where
     Ok(wifi_ap)
 }
 
+/// Configures the Wi-Fi module as an Access Point (AP) with predefined settings.
+///
+/// - SSID: `esp-clock`
+/// - Password: `bttf-rust`
+/// - Authentication: WPA2-Personal
+/// - Max connections: 4
+///
+/// ## Arguments
+///
+/// - `wifi_ap`: The Wi-Fi driver instance.
+///
+/// ## Returns
+///
+/// - `Ok(EspWifi)`: The configured Wi-Fi instance.
+/// - `Err(AppError)`: If an error occurs during configuration.
+///
+/// ## Example
+///
+/// ```rust
+/// let wifi_ap = configure_ap(wifi_driver)?;
+/// ```
 fn configure_ap(wifi_ap: WifiDriver) -> Result<EspWifi, AppError> {
     let mut wifi_ap = EspWifi::wrap(wifi_ap)?;
 
@@ -43,7 +82,23 @@ fn configure_ap(wifi_ap: WifiDriver) -> Result<EspWifi, AppError> {
     Ok(wifi_ap)
 }
 
-pub fn connect_wifi_ap(wifi: &mut BlockingWifi<EspWifi<'static>>) -> Result<(), AppError> {
+/// Starts the Wi-Fi Access Point and waits until the network interface is up.
+///
+/// ## Parameters
+///
+/// - `wifi`: A mutable reference to a [BlockingWifi] instance.
+///
+/// ## Returns
+///
+/// - `Ok(())`: If the AP starts successfully.
+/// - `Err(AppError)`: If the AP fails to start.
+///
+/// ## Example
+///
+/// ```rust
+/// start_wifi_ap(&mut wifi_ap)?;
+/// ```
+pub fn start_wifi_ap(wifi: &mut BlockingWifi<EspWifi<'static>>) -> Result<(), AppError> {
     wifi.start()?;
     log::info!("Wifi started!");
 

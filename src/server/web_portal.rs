@@ -21,9 +21,9 @@ use esp_idf_svc::{
 /// Generates the web portal page response for the HTTP request.
 ///
 /// This function returns a closure that handles the HTTP request for the
-/// web_portal.html page. It serves the contents of an HTML file as the response.
+/// `web_portal.html` page. It serves the contents of an HTML file as the response.
 ///
-/// # Returns
+/// ## Returns
 ///
 /// A closure that handles an HTTP request and returns an HTML response
 /// with the content of the `web_portal.html` file.
@@ -37,9 +37,9 @@ pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<()
     }
 }
 
-/// Returns the current status of the system including [wifi::WIFI_SSID], [time::TIMEZONE], and time digits.
+/// Returns the current status of the system including Wi-Fi SSID, Timezone and actual time.
 ///
-/// # Returns
+/// ## Returns
 ///
 /// A closure that handles the HTTP request and returns an HTML response with system status information.
 pub fn get_status(
@@ -63,6 +63,22 @@ pub fn get_status(
     }
 }
 
+/// Creates an HTTP handler that performs a factory reset by deleting Wi-Fi credentials and restarting the device.
+///
+/// ## Behavior
+///
+/// - Deletes the stored Wi-Fi credentials from NVS.
+/// - Disconnects from the current Wi-Fi network.
+/// - Restarts the ESP32 device.
+///
+/// ## Returns
+///
+/// - A closure that can be used as an HTTP request handler.
+/// - This function does not return control after execution, as the device restarts.
+///
+/// ## Safety
+///
+/// - Calls `esp_restart()`, which immediately reboots the device. Any unsaved data will be lost.
 pub fn factory_reset(
     nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
@@ -117,11 +133,11 @@ pub unsafe fn set_digits(
 /// and updates the display's brightness accordingly. The brightness value must
 /// be between 1 and 7.
 ///
-/// # Arguments
+/// ## Arguments
 ///
 /// * `display` - A [SharedTm1637] display instance.
 ///
-/// # Returns
+/// ## Returns
 ///
 /// A closure that handles the HTTP request, updates the brightness, and returns
 /// a success message.
@@ -154,12 +170,12 @@ pub unsafe fn set_brightness(
 /// This function restarts the SNTP synchronization process, waits for completion,
 /// and updates the display with the current time once synchronization is finished.
 ///
-/// # Arguments
+/// ## Arguments
 ///
 /// * `display` - A [SharedTm1637] display instance.
 /// * `sntp` - An instance of [Sntp] used to synchronize the time.
 ///
-/// # Returns
+/// ## Returns
 ///
 /// A closure that handles the HTTP request, synchronizes the time, updates the display,
 /// and returns a success message.
@@ -189,6 +205,23 @@ pub unsafe fn sync_time(
     }
 }
 
+/// Creates an HTTP handler that changes the LED strip theme based on a query parameter.
+///
+/// ## Arguments
+///
+/// - Reads the requested theme from the URL query parameter.
+/// - Sets the LED strip color based on the provided theme value.
+/// - Responds with `"Theme Updated!"` if successful.
+/// - Returns an error if the theme value is invalid.
+///
+/// ## Safety
+///
+/// - This function is marked as `unsafe` because it manipulates shared hardware resources (`led_strip`).
+/// - The caller must ensure safe access to the shared `led_strip` instance.
+///
+/// ## Returns
+///
+/// - A closure that acts as an HTTP request handler.
 pub unsafe fn set_theme(
     led_strip: SharedLedStrip,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {

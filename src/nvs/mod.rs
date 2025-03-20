@@ -2,7 +2,25 @@ use crate::wifi::WifiCredentials;
 use esp_idf_svc::nvs::{EspNvs, NvsDefault};
 use postcard::{from_bytes, to_vec};
 
-#[allow(unused)]
+/// Saves Wi-Fi credentials to NVS storage.
+///
+/// ## Arguments
+///
+/// * `nvs` - A mutable reference to the ESP NVS storage.
+/// * `ssid` - The Wi-Fi SSID as a `String`.
+/// * `password` - The Wi-Fi password as a `String`.
+///
+/// ## Behavior
+///
+/// Stores the provided SSID and password under the key `"net_info"`.  
+/// If the operation succeeds, logs a success message; otherwise, logs an error message.
+///
+/// ## Example
+///
+/// ```rust
+/// let mut nvs = initialize_nvs(); // Assume this function initializes NVS.
+/// save_wifi_credentials(&mut nvs, "MyNetwork".to_string(), "SecurePass123".to_string());
+/// ```
 pub fn save_wifi_credentials(nvs: &mut EspNvs<NvsDefault>, ssid: String, password: String) {
     let key_wifi_credentials: &str = "net_info";
     let key_wifi_credentials_data = WifiCredentials { ssid, password };
@@ -16,6 +34,33 @@ pub fn save_wifi_credentials(nvs: &mut EspNvs<NvsDefault>, ssid: String, passwor
     };
 }
 
+/// Retrieves stored Wi-Fi credentials from NVS, if available.
+///
+/// ## Arguments
+///
+/// * `nvs` - A mutable reference to the ESP NVS storage.
+///
+/// ## Returns
+///
+/// * `Ok(Some(WifiCredentials))` - If credentials are found and successfully deserialized.
+/// * `Ok(None)` - If no credentials are stored.
+/// * `Err(String)` - If an error occurs during retrieval or deserialization.
+///
+/// ## Behavior
+///
+/// Attempts to fetch and deserialize Wi-Fi credentials from the `"net_info"` key.
+/// If retrieval or deserialization fails, returns an error message.
+///
+/// ## Example
+///
+/// ```rust
+/// let mut nvs = initialize_nvs(); // Assume this function initializes NVS.
+/// match get_maybe_wifi_credentials(&mut nvs) {
+///     Ok(Some(credentials)) => println!("SSID: {}, Password: {}", credentials.ssid, credentials.password),
+///     Ok(None) => println!("No credentials found."),
+///     Err(e) => eprintln!("Error retrieving credentials: {}", e),
+/// }
+/// ```
 pub fn get_maybe_wifi_credentials(
     nvs: &mut EspNvs<NvsDefault>,
 ) -> Result<Option<WifiCredentials>, String> {
@@ -34,7 +79,23 @@ pub fn get_maybe_wifi_credentials(
     }
 }
 
-#[allow(unused)]
+/// Deletes stored Wi-Fi credentials from NVS.
+///
+/// ## Arguments
+///
+/// * `nvs` - A mutable reference to the ESP NVS storage.
+///
+/// ## Behavior
+///
+/// Removes the Wi-Fi credentials stored under the `"net_info"` key.  
+/// If the operation succeeds, logs a success message; otherwise, logs an error message.
+///
+/// ## Example
+///
+/// ```rust
+/// let mut nvs = initialize_nvs(); // Assume this function initializes NVS.
+/// delete_wifi_credentials(&mut nvs);
+/// ```
 pub fn delete_wifi_credentials(nvs: &mut EspNvs<NvsDefault>) {
     let key_wifi_credentials: &str = "net_info";
 

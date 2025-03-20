@@ -12,10 +12,10 @@ pub static TIMEZONE: Tz = America::Sao_Paulo;
 /// This function converts the current UTC time to the [TIMEZONE],
 /// and then extracts the hour and minute components as a vector of 4 digits.
 ///
-/// # Returns
+/// ## Returns
 /// A vector of 4 bytes representing the hour and minute, where each byte is a digit.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// let time = get_time();
 /// ```

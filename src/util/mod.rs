@@ -17,18 +17,17 @@ pub const DISPLAY_DIGIT: [u8; 10] = [
 /// This function finds the query string in the URL, extracts the part after the "?" symbol,
 /// and then returns the digits found before the next "&" symbol, if present.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `url`: A string slice representing the URL to be processed.
 ///
-/// # Returns
+/// ## Returns
 /// A vector of bytes representing the extracted digits from the query string, or an empty vector if no digits are found.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// let digits = find_digits_in_url("http://example.com?12345&other_param=value");
 /// assert_eq!(digits, b"12345");
 /// ```
-///
 pub fn find_digits_in_url(url: &str) -> Vec<u8> {
     // Find the position of the '?' character in the URL
     if let Some(start) = url.find('?') {
