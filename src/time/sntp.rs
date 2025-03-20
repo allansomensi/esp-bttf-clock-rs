@@ -9,11 +9,11 @@ pub type Sntp = EspSntp<'static>;
 /// This function creates and returns an instance of the [EspSntp] client, which is used
 /// to synchronize the device's time with a network time server.
 ///
-/// # Returns
+/// ## Returns
 /// - `Ok(EspSntp)`: The successfully created SNTP client instance.
 /// - `Err(AppError)`: If there is an error during the SNTP client creation.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// let sntp = get_sntp().expect("Failed to initialize SNTP client");
 /// ```
@@ -25,13 +25,13 @@ pub fn get_sntp() -> Result<EspSntp<'static>, AppError> {
 ///
 /// This function blocks the execution until the time synchronization is completed.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `sntp`: A reference to the [Sntp] client that manages the synchronization process.
 ///
-/// # Returns
+/// ## Returns
 /// `Ok(())` if the synchronization is successful, or an [AppError] if an error occurs.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// let sntp = get_sntp().expect("Failed to initialize SNTP client");
 /// init_sntp(&sntp).expect("Failed to sync SNTP time");

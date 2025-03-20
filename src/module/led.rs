@@ -19,10 +19,10 @@ impl Default for LedStripTheme {
 impl LedStripTheme {
     /// Generates a vector of LED colors based on the selected theme.
     ///
-    /// # Parameters
+    /// ## Arguments
     /// - `num_leds`: The number of LEDs in the strip.
     ///
-    /// # Returns
+    /// ## Returns
     /// A vector containing `num_leds` elements of the selected theme color.
     pub fn get_colors(&self, num_leds: u8) -> Vec<RGB8> {
         let color = match self {
@@ -46,17 +46,17 @@ pub struct LedStrip<'a> {
 }
 
 impl LedStrip<'_> {
-    /// Creates a new `LedStrip` instance.
+    /// Creates a new [LedStrip] instance.
     ///
-    /// # Parameters
+    /// ## Arguments
     /// - `channel`: The RMT channel to use for LED communication (implements [Peripheral] + [RmtChannel]).
     /// - `dio`: The data pin for the LED strip (implements [IOPin]).
     /// - `num_leds`: The number of LEDs in the strip.
     ///
-    /// # Returns
-    /// A `Result` containing a shared `LedStrip` instance on success, or an `AppError` on failure.
+    /// ## Returns
+    /// A `Result` containing a shared [LedStrip] instance on success, or an [AppError] on failure.
     ///
-    /// # Example
+    /// ## Example
     /// ```
     /// let led_strip = LedStrip::new(channel, dio, 7).expect("Failed to create LED strip");
     /// ```
@@ -71,8 +71,8 @@ impl LedStrip<'_> {
 
     /// Turns off all LEDs in the strip.
     ///
-    /// # Returns
-    /// A `Result` indicating success or an `AppError` on failure.
+    /// ## Returns
+    /// A `Result` indicating success or an [AppError] on failure.
     pub fn turn_off(&mut self) -> Result<(), AppError> {
         let data = vec![RGB8 { r: 0, g: 0, b: 0 }; self.num_leds as usize];
         self.ws2812.write_nocopy(data)?;
@@ -81,7 +81,7 @@ impl LedStrip<'_> {
 
     /// Sets the LED strip to a predefined color theme.
     ///
-    /// # Parameters
+    /// # Arguments
     /// - `theme`: The [LedStripTheme] to apply to the LEDs.
     ///
     /// # Returns

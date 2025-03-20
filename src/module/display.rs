@@ -6,7 +6,7 @@ use esp_idf_svc::hal::{
 use std::sync::{Arc, Mutex};
 use tm1637::TM1637;
 
-/// Type alias for the [TM1637] display using pin drivers and [FreeRtos] as time control.
+/// Type alias for the [TM1637] display using pin drivers and [Ets] as time control.
 /// This is an ´Arc<Mutex<>>´ to ensure thread safety and shared access to the display.
 pub type SharedTm1637<CLK, DIO> = Arc<
     Mutex<
@@ -24,10 +24,10 @@ pub enum DisplayMessage {
 impl DisplayMessage {
     /// Converts the display message into a 4-byte array that represents the bits to be shown on the display.
     ///
-    /// # Returns
+    /// ## Returns
     /// Returns a 4-byte array, each byte representing a value for display output.
     ///
-    /// # Example
+    /// ## Example
     /// ```rust
     /// let message = DisplayMessage::Init.as_bytes();
     /// ```
@@ -51,14 +51,14 @@ impl DisplayMessage {
 
 /// Creates a [TM1637] display object.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `clk`: Pin for the clock of the display (implements [OutputPin]).
 /// - `dio`: Pin for the data of the display (implements [IOPin]).
 ///
-/// # Returns
+/// ## Returns
 /// The result is an instance of the [TM1637] ready for interaction.
 ///
-/// # Example
+/// ## Example
 /// ```
 /// let display = get_display(clk_pin, dio_pin).expect("Failed to create display");
 /// ```
@@ -78,13 +78,13 @@ where
 
 /// Initializes the display with an initial message and sets its brightness.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `display`: A reference to [SharedTm1637].
 ///
-/// # Returns
+/// ## Returns
 /// `Ok(())` if the initialization is successful, or an [AppError] if it fails.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// init_display(&display).expect("Failed to initialize display");
 /// ```
@@ -105,13 +105,13 @@ where
 /// Updates the display with the current time formatted into digits.
 /// The time is fetched using [time::get_time] and displayed in a 4-digit format.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `display`: A reference to [SharedTm1637].
 ///
-/// # Returns
+/// ## Returns
 /// `Ok(())` if the time update is successful, or an [AppError] if it fails.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// update_display_time(&display).expect("Failed to update display time");
 /// ```
@@ -136,14 +136,14 @@ where
 
 /// Writes a 4-byte message to the display, clearing it first and then printing the message.
 ///
-/// # Parameters
+/// ## Arguments
 /// - `display`: A reference to [SharedTm1637].
-/// - `message`: A 4-byte array representing the message to be displayed on the screen. Each byte corresponds to a digit or symbol shown.
+/// - `message`: A 4-byte array representing the message to be displayed on the screen. Each byte corresponds to a digit shown.
 ///
-/// # Returns
+/// ## Returns
 /// Returns `Ok(())` if the message is successfully written to the display, or an [AppError] if any error occurs during the process.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// write(&display, [0b01100001, 0b01100010, 0b01100011, 0b01100100])
 ///     .expect("Error printing message");

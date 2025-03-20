@@ -9,11 +9,32 @@ use esp_idf_svc::{
     io::{Read, Write},
 };
 
-// Max payload length
+/// Max payload length
 const MAX_LEN: usize = 128;
 
 static CAPTIVE_PORTAL_HTML: &str = include_str!("../view/captive_portal.html");
 
+/// Starts a captive portal HTTP server for configuring Wi-Fi credentials.
+///
+/// ## Behavior
+///
+/// - Serves an HTML page at `"/"` to allow users to enter Wi-Fi credentials.
+/// - Accepts a JSON payload via `POST /set_config` containing Wi-Fi credentials.
+/// - Stores the received credentials in the [WIFI_CREDENTIALS] global variable.
+/// - Waits until credentials are received before exiting.
+///
+/// ## Returns
+///
+/// - `Ok(())` if the portal is successfully initialized and credentials are received.
+/// - `Err(AppError)` if server creation fails.
+///
+/// ## Example
+///
+/// ```rust
+/// if let Err(e) = start_captive_portal() {
+///     eprintln!("Failed to start captive portal: {:?}", e);
+/// }
+/// ```
 pub fn start_captive_portal() -> Result<(), AppError> {
     let mut server = create_server()?;
 

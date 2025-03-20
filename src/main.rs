@@ -24,6 +24,7 @@ fn main() -> Result<(), error::AppError> {
     let sysloop = EspSystemEventLoop::take().expect("Failed to take event loop");
     let nvs_default_partition = EspDefaultNvsPartition::take()?;
 
+    // Define the namespace for storing Wi-Fi settings in NVS
     let wifi_namespace = "wifi_ns";
 
     // Initialize NVS
@@ -39,21 +40,25 @@ fn main() -> Result<(), error::AppError> {
 
     let is_ap_mode: bool;
 
+    // If no credentials are found, get the Access Point (AP) instance
     let mut wifi = if credentials.is_none() {
         is_ap_mode = true;
 
         log::warn!("Credentials not found. Starting Wifi Access Point...");
 
+        // Initialize the Wi-Fi Access Point
         let mut wifi_ap = wifi::ap::get_ap(
             peripherals.modem,
             sysloop.clone(),
             Some(nvs_default_partition),
         )?;
 
-        wifi::ap::connect_wifi_ap(&mut wifi_ap)?;
+        // Starts the AP
+        wifi::ap::start_wifi_ap(&mut wifi_ap)?;
 
         wifi_ap
     } else {
+        // If credentials are found, start the Station mode to connect to a network
         is_ap_mode = false;
 
         let credentials = credentials.unwrap();
@@ -64,6 +69,7 @@ fn main() -> Result<(), error::AppError> {
         log::info!("Wi-Fi SSID: {ssid}");
         log::info!("WIFI PASS: {password}");
 
+        // Initialize the Wi-Fi Station
         let mut wifi_station = wifi::station::get_station(
             peripherals.modem,
             sysloop.clone(),
@@ -72,6 +78,7 @@ fn main() -> Result<(), error::AppError> {
             password,
         )?;
 
+        // Connect to the Wi-Fi network
         wifi::station::connect_wifi(&mut wifi_station)?;
 
         wifi_station
@@ -79,15 +86,19 @@ fn main() -> Result<(), error::AppError> {
 
     log::info!("Wi-Fi Config: {:?}", wifi.get_configuration().unwrap());
 
+    // If the device is in AP mode, start the captive portal to capture credentials
     if is_ap_mode {
         server::captive_portal::start_captive_portal()?;
 
+        // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
             nvs::save_wifi_credentials(&mut nvs, credentials.ssid, credentials.password);
         }
 
+        // Stop the AP Wi-Fi interface
         wifi.stop()?;
 
+        // Restart the device after the configuration
         unsafe {
             esp_restart();
         }
@@ -120,6 +131,7 @@ fn main() -> Result<(), error::AppError> {
         log::error!("Failed to initialize SNTP: {:#?}", e);
     })?;
 
+    // Set the LED strip theme to default
     led_strip
         .lock()
         .unwrap()
