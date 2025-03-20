@@ -1,17 +1,21 @@
+use std::sync::{Arc, Mutex};
+
 use crate::{
     error::AppError,
     module::{
         display::{self, DisplayMessage, SharedTm1637},
         led::{LedStripTheme, SharedLedStrip},
     },
+    nvs,
     time::{self, sntp::Sntp},
     util,
 };
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
     http::server::{EspHttpConnection, Request},
+    nvs::{EspNvs, NvsDefault},
     sntp::SyncStatus,
-    sys::sntp_restart,
+    sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
 
 /// Generates the web portal page response for the HTTP request.
@@ -56,6 +60,21 @@ pub fn get_status(
         request.into_ok_response()?.write(status_html.as_bytes())?;
 
         Ok::<(), AppError>(())
+    }
+}
+
+pub fn factory_reset(
+    nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |_: Request<&mut EspHttpConnection<'_>>| {
+        nvs::delete_wifi_credentials(&mut nvs.lock().unwrap());
+        log::info!("Factory reset initiated!");
+        log::info!("Restarting...");
+
+        unsafe {
+            esp_wifi_disconnect();
+            esp_restart();
+        }
     }
 }
 
