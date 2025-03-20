@@ -6,7 +6,6 @@ use crate::{
     },
     time::{self, sntp::Sntp},
     util,
-    wifi::WIFI_CREDENTIALS,
 };
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
@@ -39,23 +38,16 @@ pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<()
 /// # Returns
 ///
 /// A closure that handles the HTTP request and returns an HTML response with system status information.
-pub fn get_status() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+pub fn get_status(
+    wifi_ssid: String,
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let timezone = time::TIMEZONE;
         let time = time::get_time();
-
-        let credentials = WIFI_CREDENTIALS.lock().unwrap().clone();
-
-        let ssid = if let Some(credentials) = credentials {
-            credentials.ssid
-        } else {
-            String::from("Offline")
-        };
-
-        let ssid = ssid.as_str();
+        let wifi_ssid = wifi_ssid.as_str();
 
         let status_html = format!(
-            "<p><strong>Wi-Fi SSID:</strong> {ssid}</p>
+            "<p><strong>Wi-Fi SSID:</strong> {wifi_ssid}</p>
         <p><strong>Time Zone:</strong> {timezone}</p>
         <p><strong>Current Time:</strong> {}{}:{}{}</p>",
             time[0], time[1], time[2], time[3]
