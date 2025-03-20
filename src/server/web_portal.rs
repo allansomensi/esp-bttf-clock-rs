@@ -1,9 +1,12 @@
 use crate::{
-    display::{self, DisplayMessage, SharedTm1637},
     error::AppError,
-    led::{LedStripTheme, SharedLedStrip},
-    time::{self, Sntp},
-    utils, wifi,
+    module::{
+        display::{self, DisplayMessage, SharedTm1637},
+        led::{LedStripTheme, SharedLedStrip},
+    },
+    time::{self, sntp::Sntp},
+    util,
+    wifi::WIFI_CREDENTIALS,
 };
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
@@ -12,18 +15,18 @@ use esp_idf_svc::{
     sys::sntp_restart,
 };
 
-/// Generates the index page response for the HTTP request.
+/// Generates the web portal page response for the HTTP request.
 ///
 /// This function returns a closure that handles the HTTP request for the
-/// index.html page. It serves the contents of an HTML file as the response.
+/// web_portal.html page. It serves the contents of an HTML file as the response.
 ///
 /// # Returns
 ///
 /// A closure that handles an HTTP request and returns an HTML response
-/// with the content of the `index.html` file.
-pub fn index() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+/// with the content of the `web_portal.html` file.
+pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let html = include_str!("static/index.html").to_string();
+        let html = include_str!("../view/web_portal.html").to_string();
 
         let mut response = request.into_ok_response()?;
         response.write(html.as_bytes())?;
@@ -41,15 +44,21 @@ pub fn get_status() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<()
         let timezone = time::TIMEZONE;
         let time = time::get_time();
 
+        let credentials = WIFI_CREDENTIALS.lock().unwrap().clone();
+
+        let ssid = if let Some(credentials) = credentials {
+            credentials.ssid
+        } else {
+            String::from("Offline")
+        };
+
+        let ssid = ssid.as_str();
+
         let status_html = format!(
-            "<p><strong>Wi-Fi SSID:</strong> {}</p>
+            "<p><strong>Wi-Fi SSID:</strong> {ssid}</p>
         <p><strong>Time Zone:</strong> {timezone}</p>
         <p><strong>Current Time:</strong> {}{}:{}{}</p>",
-            wifi::WIFI_SSID,
-            time[0],
-            time[1],
-            time[2],
-            time[3]
+            time[0], time[1], time[2], time[3]
         );
 
         request.into_ok_response()?.write(status_html.as_bytes())?;
@@ -75,7 +84,7 @@ pub unsafe fn set_digits(
     display: SharedTm1637<impl OutputPin, impl IOPin>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let digits = utils::find_digits_in_url(request.uri());
+        let digits = util::find_digits_in_url(request.uri());
 
         let mut locked_display = display.lock().unwrap();
         locked_display.clear()?;
