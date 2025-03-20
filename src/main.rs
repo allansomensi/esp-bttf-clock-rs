@@ -135,8 +135,21 @@ fn main() -> Result<(), error::AppError> {
             log::error!("Failed to register index handler: {:#?}", e);
         })?;
 
+    let wifi_ssid = wifi
+        .wifi()
+        .get_configuration()
+        .unwrap()
+        .as_client_conf_ref()
+        .unwrap()
+        .ssid
+        .to_string();
+
     web_portal_server
-        .fn_handler("/get_status", Method::Get, server::web_portal::get_status())
+        .fn_handler(
+            "/get_status",
+            Method::Get,
+            server::web_portal::get_status(wifi_ssid),
+        )
         .inspect_err(|&e| {
             log::error!("Failed to register get_status handler: {:#?}", e);
         })?;
