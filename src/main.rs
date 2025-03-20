@@ -1,112 +1,183 @@
-use error::AppError;
 use esp_idf_svc::{
+    eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, prelude::Peripherals},
     http::Method,
+    nvs::{EspDefaultNvsPartition, EspNvs},
+    sys::esp_restart,
 };
 
-mod display;
 mod error;
-mod handler;
-mod led;
+mod module;
+mod nvs;
 mod server;
 mod time;
-mod utils;
+mod util;
 mod wifi;
 
-fn main() -> Result<(), AppError> {
+fn main() -> Result<(), error::AppError> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
 
     let peripherals = Peripherals::take().expect("Failed to take peripherals");
+    let sysloop = EspSystemEventLoop::take().expect("Failed to take event loop");
+    let nvs_default_partition = EspDefaultNvsPartition::take()?;
+
+    let wifi_namespace = "wifi_ns";
+
+    // Initialize NVS
+    let mut nvs = match EspNvs::new(nvs_default_partition.clone(), wifi_namespace, true) {
+        Ok(nvs) => {
+            log::info!("Got namespace {:?} from default partition", wifi_namespace);
+            nvs
+        }
+        Err(e) => panic!("Could't get namespace {:?}", e),
+    };
+
+    let credentials = nvs::get_maybe_wifi_credentials(&mut nvs).unwrap();
+
+    let is_ap_mode: bool;
+
+    let mut wifi = if credentials.is_none() {
+        is_ap_mode = true;
+
+        log::warn!("Credentials not found. Starting Wifi Access Point...");
+
+        let mut wifi_ap = wifi::ap::get_ap(
+            peripherals.modem,
+            sysloop.clone(),
+            Some(nvs_default_partition),
+        )?;
+
+        wifi::ap::connect_wifi_ap(&mut wifi_ap)?;
+
+        wifi_ap
+    } else {
+        is_ap_mode = false;
+
+        let credentials = credentials.unwrap();
+        let ssid = credentials.ssid;
+        let password = credentials.password;
+
+        log::info!("Credentials found. Starting Wifi Station...");
+        log::info!("Wi-Fi SSID: {ssid}");
+        log::info!("WIFI PASS: {password}");
+
+        let mut wifi_station = wifi::station::get_station(
+            peripherals.modem,
+            sysloop.clone(),
+            Some(nvs_default_partition),
+            ssid,
+            password,
+        )?;
+
+        wifi::station::connect_wifi(&mut wifi_station)?;
+
+        wifi_station
+    };
+
+    log::info!("Wi-Fi Config: {:?}", wifi.get_configuration().unwrap());
+
+    if is_ap_mode {
+        server::captive_portal::start_captive_portal()?;
+
+        if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
+            nvs::save_wifi_credentials(&mut nvs, credentials.ssid, credentials.password);
+        }
+
+        wifi.stop()?;
+
+        unsafe {
+            esp_restart();
+        }
+    }
 
     // Initialize the display
-    let display = display::get_display(peripherals.pins.gpio4, peripherals.pins.gpio5)
+    let display = module::display::get_display(peripherals.pins.gpio4, peripherals.pins.gpio5)
         .inspect_err(|e| {
             log::error!("Failed to get display: {:#?}", e);
         })?;
-    display::init_display(&display).inspect_err(|e| {
+    module::display::init_display(&display).inspect_err(|e| {
         log::error!("Failed to initialize display: {:#?}", e);
     })?;
+    log::info!("Display initialized successfully!");
 
     // Initialize the led strip
-    let led_strip = led::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio13, 7)
-        .inspect_err(|e| {
-            log::error!("Failed to get led strip: {:#?}", e);
-        })?;
+    let led_strip =
+        module::led::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio13, 7)
+            .inspect_err(|e| {
+                log::error!("Failed to get led strip: {:#?}", e);
+            })?;
     led_strip.lock().unwrap().turn_off()?;
-
-    // Initialize Wi-Fi
-    let mut wifi = wifi::get_wifi(peripherals.modem).inspect_err(|e| {
-        log::error!("Failed to get Wi-Fi: {:#?}", e);
-    })?;
-    wifi::init_wifi(&mut wifi).inspect_err(|e| {
-        log::error!("Failed to initialize Wi-Fi: {:#?}", e);
-    })?;
+    log::info!("Led strip initialized successfully!");
 
     // Initialize SNTP
-    let sntp = time::get_sntp().inspect_err(|e| {
+    let sntp = time::sntp::get_sntp().inspect_err(|e| {
         log::error!("Failed to get SNTP: {:#?}", e);
     })?;
-    time::init_sntp(&sntp).inspect_err(|e| {
+    time::sntp::init_sntp(&sntp).inspect_err(|e| {
         log::error!("Failed to initialize SNTP: {:#?}", e);
     })?;
 
     led_strip
         .lock()
         .unwrap()
-        .set_theme(led::LedStripTheme::default())?;
+        .set_theme(module::led::LedStripTheme::default())?;
 
-    // Start the HTTP server
-    let mut http_server = server::start_server().inspect_err(|e| {
+    // Start the Web portal HTTP server
+    let mut web_portal_server = server::create_server().inspect_err(|e| {
         log::error!("Failed to start HTTP server: {:#?}", e);
     })?;
 
     // Define HTTP routes
-    http_server
-        .fn_handler("/", Method::Get, handler::index())
+    web_portal_server
+        .fn_handler("/", Method::Get, server::web_portal::web_portal())
         .inspect_err(|&e| {
             log::error!("Failed to register index handler: {:#?}", e);
         })?;
 
-    http_server
-        .fn_handler("/get_status", Method::Get, handler::get_status())
+    web_portal_server
+        .fn_handler("/get_status", Method::Get, server::web_portal::get_status())
         .inspect_err(|&e| {
             log::error!("Failed to register get_status handler: {:#?}", e);
         })?;
 
     unsafe {
-        http_server
+        web_portal_server
             .fn_handler_nonstatic(
                 "/set_digits",
                 Method::Get,
-                handler::set_digits(display.clone()),
+                server::web_portal::set_digits(display.clone()),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_digits handler: {:#?}", e);
             })?;
 
-        http_server
+        web_portal_server
             .fn_handler_nonstatic(
                 "/set_brightness",
                 Method::Get,
-                handler::set_brightness(display.clone()),
+                server::web_portal::set_brightness(display.clone()),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_brightness handler: {:#?}", e);
             })?;
 
-        http_server
+        web_portal_server
             .fn_handler_nonstatic(
                 "/sync_time",
                 Method::Get,
-                handler::sync_time(display.clone(), sntp),
+                server::web_portal::sync_time(display.clone(), sntp),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {:#?}", e);
             })?;
 
-        http_server
-            .fn_handler_nonstatic("/set_theme", Method::Get, handler::set_theme(led_strip))
+        web_portal_server
+            .fn_handler_nonstatic(
+                "/set_theme",
+                Method::Get,
+                server::web_portal::set_theme(led_strip),
+            )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_theme handler: {:#?}", e);
             })?;
@@ -114,7 +185,7 @@ fn main() -> Result<(), AppError> {
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {
-        display::update_display_time(&display.clone())
+        module::display::update_display_time(&display.clone())
             .inspect_err(|e| {
                 log::error!("Failed to update display time: {:#?}", e);
             })

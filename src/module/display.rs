@@ -1,6 +1,6 @@
-use crate::{error::AppError, time, utils::DISPLAY_DIGIT};
+use crate::{error::AppError, time, util::DISPLAY_DIGIT};
 use esp_idf_svc::hal::{
-    delay::FreeRtos,
+    delay::Ets,
     gpio::{IOPin, InputOutput, Output, OutputPin, PinDriver},
 };
 use std::sync::{Arc, Mutex};
@@ -10,12 +10,7 @@ use tm1637::TM1637;
 /// This is an ´Arc<Mutex<>>´ to ensure thread safety and shared access to the display.
 pub type SharedTm1637<CLK, DIO> = Arc<
     Mutex<
-        TM1637<
-            'static,
-            PinDriver<'static, CLK, Output>,
-            PinDriver<'static, DIO, InputOutput>,
-            FreeRtos,
-        >,
+        TM1637<'static, PinDriver<'static, CLK, Output>, PinDriver<'static, DIO, InputOutput>, Ets>,
     >,
 >;
 
@@ -74,7 +69,7 @@ where
 {
     let clk = Box::new(PinDriver::output(clk)?);
     let dio = Box::new(PinDriver::input_output(dio)?);
-    let delay = Box::new(FreeRtos {});
+    let delay = Box::new(Ets);
 
     let display = TM1637::new(Box::leak(clk), Box::leak(dio), Box::leak(delay));
 

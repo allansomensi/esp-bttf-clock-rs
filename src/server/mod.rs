@@ -1,5 +1,11 @@
 use crate::error::AppError;
-use esp_idf_svc::http::server::{Configuration as ServerConfiguration, EspHttpServer};
+use esp_idf_svc::http::server::EspHttpServer;
+
+pub mod captive_portal;
+pub mod web_portal;
+
+// Need lots of stack to parse JSON
+const STACK_SIZE: usize = 10240;
 
 /// Initializes and starts an HTTP server.
 ///
@@ -15,8 +21,11 @@ use esp_idf_svc::http::server::{Configuration as ServerConfiguration, EspHttpSer
 /// ```rust
 /// let server = start_server().expect("Failed to start HTTP server");
 /// ```
-pub fn start_server() -> Result<EspHttpServer<'static>, AppError> {
-    let http_server = EspHttpServer::new(&ServerConfiguration::default())?;
+pub fn create_server() -> Result<EspHttpServer<'static>, AppError> {
+    let server_configuration = esp_idf_svc::http::server::Configuration {
+        stack_size: STACK_SIZE,
+        ..Default::default()
+    };
 
-    Ok(http_server)
+    Ok(EspHttpServer::new(&server_configuration)?)
 }

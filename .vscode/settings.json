@@ -8,5 +8,10 @@
         "time",
         "utils",
         "wifi",
-    ]
+    ],
+    "material-icon-theme.folders.associations": {
+        "wifi": "public",
+        "nvs": "dump",
+        "time": "temp"
+    }
 }
