@@ -222,7 +222,7 @@ pub unsafe fn sync_time(
 /// ## Returns
 ///
 /// - A closure that acts as an HTTP request handler.
-pub unsafe fn set_theme(
+pub fn set_theme(
     led_strip: SharedLedStrip,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
