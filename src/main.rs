@@ -104,6 +104,12 @@ fn main() -> Result<(), error::AppError> {
         }
     }
 
+    // Initialize mDNS
+    let mut mdns = esp_idf_svc::mdns::EspMdns::take()?;
+    mdns.set_hostname("espclock")?;
+    mdns.set_instance_name("espclock")?;
+    mdns.add_service(None, "_http", "_tcp", 80, &[])?;
+
     // Initialize the display
     let display = module::display::get_display(peripherals.pins.gpio4, peripherals.pins.gpio5)
         .inspect_err(|e| {
