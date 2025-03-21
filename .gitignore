@@ -1,3 +1,6 @@
 /.embuild
 /target
 /Cargo.lock
+
+# Created by `esp-idf-sys` for the mDNS feature
+/components_esp32.lock
