@@ -170,6 +170,16 @@ fn main() -> Result<(), error::AppError> {
 
     web_portal_server
         .fn_handler(
+            "/set_theme",
+            Method::Get,
+            server::web_portal::set_theme(led_strip),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register set_theme handler: {:#?}", e);
+        })?;
+
+    web_portal_server
+        .fn_handler(
             "/factory_reset",
             Method::Get,
             server::web_portal::factory_reset(Arc::new(Mutex::new(nvs))),
@@ -207,16 +217,6 @@ fn main() -> Result<(), error::AppError> {
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {:#?}", e);
-            })?;
-
-        web_portal_server
-            .fn_handler_nonstatic(
-                "/set_theme",
-                Method::Get,
-                server::web_portal::set_theme(led_strip),
-            )
-            .inspect_err(|&e| {
-                log::error!("Failed to register set_theme handler: {:#?}", e);
             })?;
     }
 
