@@ -2,6 +2,7 @@ use crate::error::AppError;
 use esp_idf_svc::http::server::{Configuration as ServerConfiguration, EspHttpServer};
 
 pub mod captive_portal;
+pub mod dns_responder;
 pub mod web_portal;
 
 /// Need lots of stack to parse JSON

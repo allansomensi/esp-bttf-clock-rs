@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, prelude::Peripherals},
@@ -7,6 +5,14 @@ use esp_idf_svc::{
     nvs::{EspDefaultNvsPartition, EspNvs},
     sys::esp_restart,
 };
+use server::dns_responder::DnsResponder;
+use std::{
+    net::Ipv4Addr,
+    str::FromStr,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+use wifi::ap::AP_IP_ADDRESS;
 
 mod error;
 mod module;
@@ -88,6 +94,20 @@ fn main() -> Result<(), error::AppError> {
 
     // If the device is in AP mode, start the captive portal to capture credentials
     if is_ap_mode {
+        let ap_ip_address = Ipv4Addr::from_str(AP_IP_ADDRESS).expect("Error reading AP_IP_ADDRESS");
+
+        // Starts the DNS server for the Captive Portal
+        log::info!("Starting DNS Responder...");
+        let mut dns_responder =
+            DnsResponder::init(ap_ip_address).expect("Failed to initialize DNS Responder");
+
+        // Runs the DNS server on another thread and accepts the timeout error with .ok().
+        std::thread::spawn(move || loop {
+            dns_responder.handle_requests().ok();
+            std::thread::sleep(Duration::from_millis(100));
+        });
+
+        // Starts the server with the Wi-Fi configuration handler and the captive portal redirection handlers
         server::captive_portal::start_captive_portal()?;
 
         // If new credentials are received, store them in NVS
