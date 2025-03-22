@@ -5,7 +5,10 @@ use crate::{
 };
 use embedded_svc::http::Headers;
 use esp_idf_svc::{
-    http::Method,
+    http::{
+        server::{EspHttpConnection, Request},
+        Method,
+    },
     io::{Read, Write},
 };
 
@@ -16,12 +19,15 @@ static CAPTIVE_PORTAL_HTML: &str = include_str!("../view/captive_portal.html");
 
 /// Starts a captive portal HTTP server for configuring Wi-Fi credentials.
 ///
+/// The portal automatically redirects devices to the configuration page when they try to access network connectivity check URLs.
+///
 /// ## Behavior
 ///
-/// - Serves an HTML page at `"/"` to allow users to enter Wi-Fi credentials.
+/// - Serves an HTML page at the root (`"/"`) URL to allow users to enter Wi-Fi credentials.
 /// - Accepts a JSON payload via `POST /set_config` containing Wi-Fi credentials.
 /// - Stores the received credentials in the [WIFI_CREDENTIALS] global variable.
-/// - Waits until credentials are received before exiting.
+/// - Waits until valid credentials are received before exiting.
+/// - Supports automatic redirection to the captive portal page.
 ///
 /// ## Returns
 ///
@@ -38,12 +44,34 @@ static CAPTIVE_PORTAL_HTML: &str = include_str!("../view/captive_portal.html");
 pub fn start_captive_portal() -> Result<(), AppError> {
     let mut server = create_server()?;
 
-    server.fn_handler("/", Method::Get, |req| {
-        req.into_ok_response()?
+    let config_page = move |request: Request<&'_ mut EspHttpConnection<'_>>| {
+        request
+            .into_ok_response()?
             .write_all(CAPTIVE_PORTAL_HTML.as_bytes())
-            .map(|_| ())
-    })?;
+            .map(|_| ())?;
+        Ok::<(), AppError>(())
+    };
 
+    server.fn_handler("/", Method::Get, config_page)?;
+
+    // Captive Portal Routes
+
+    // Generic
+    server.fn_handler("/gen_204", Method::Get, config_page)?;
+    server.fn_handler("/generate_204", Method::Get, config_page)?;
+    server.fn_handler("/fwlink", Method::Get, config_page)?;
+    server.fn_handler("/hotspot-detect.html", Method::Get, config_page)?;
+    server.fn_handler("/check_network_status.txt", Method::Get, config_page)?;
+    server.fn_handler("/connectivity-check.html", Method::Get, config_page)?;
+    server.fn_handler("/library/test/success.html", Method::Get, config_page)?;
+
+    // Windows
+    server.fn_handler("/ncsi.txt", Method::Get, config_page)?;
+
+    // Other
+    server.fn_handler("/chat", Method::Get, config_page)?;
+
+    // Send the Wi-Fi credentials
     server.fn_handler::<AppError, _>("/set_config", Method::Post, |mut req| {
         let len = req.content_len().unwrap_or(0) as usize;
 

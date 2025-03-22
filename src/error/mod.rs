@@ -3,8 +3,11 @@ use esp_idf_svc::{io::EspIOError, sys::EspError};
 /// Represents errors that can occur in the application.
 #[derive(thiserror::Error, Debug)]
 pub enum AppError {
-    #[error("I/O error: {0}")]
-    IO(#[from] EspIOError),
+    #[error("Esp I/O error: {0}")]
+    EspIO(#[from] EspIOError),
+
+    #[error("Std I/O error: {0}")]
+    StdIO(#[from] std::io::Error),
 
     #[error("System error: {0}")]
     System(#[from] EspError),

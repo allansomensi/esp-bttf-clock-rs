@@ -1,8 +1,12 @@
+use std::{net::Ipv4Addr, str::FromStr};
+
 use super::get_wifi;
 use crate::error::AppError;
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{modem::WifiModemPeripheral, peripheral::Peripheral},
+    ipv4::{self, Mask, RouterConfiguration, Subnet},
+    netif::{EspNetif, NetifConfiguration, NetifStack},
     nvs::EspDefaultNvsPartition,
     wifi::{
         AccessPointConfiguration, AuthMethod, BlockingWifi, Configuration as WifiConfiguration,
@@ -10,6 +14,7 @@ use esp_idf_svc::{
     },
 };
 
+pub const AP_IP_ADDRESS: &str = env!("AP_IP_ADDRESS");
 const AP_SSID: &str = "esp-clock";
 const AP_PASS: &str = "bttf-rust";
 
@@ -48,10 +53,12 @@ where
 
 /// Configures the Wi-Fi module as an Access Point (AP) with predefined settings.
 ///
-/// - SSID: `esp-clock`
-/// - Password: `bttf-rust`
+/// This function sets up the Wi-Fi module in Access Point mode with the following configuration:
+/// - SSID: [AP_SSID]
+/// - Password: [AP_PASS]
 /// - Authentication: WPA2-Personal
-/// - Max connections: 4
+/// - Maximum number of connections: 4
+/// - IP configuration: [AP_IP_ADDRESS]
 ///
 /// ## Arguments
 ///
@@ -68,7 +75,24 @@ where
 /// let wifi_ap = configure_ap(wifi_driver)?;
 /// ```
 fn configure_ap(wifi_ap: WifiDriver) -> Result<EspWifi, AppError> {
-    let mut wifi_ap = EspWifi::wrap(wifi_ap)?;
+    let ap_ip_address = Ipv4Addr::from_str(AP_IP_ADDRESS).expect("Error reading AP_IP_ADDRESS");
+
+    let mut wifi_ap = EspWifi::wrap_all(
+        wifi_ap,
+        EspNetif::new(NetifStack::Sta)?,
+        EspNetif::new_with_conf(&NetifConfiguration {
+            ip_configuration: Some(ipv4::Configuration::Router(RouterConfiguration {
+                subnet: Subnet {
+                    gateway: ap_ip_address,
+                    mask: Mask(24),
+                },
+                dhcp_enabled: true,
+                dns: Some(ap_ip_address),
+                secondary_dns: Some(ap_ip_address),
+            })),
+            ..NetifConfiguration::wifi_default_router()
+        })?,
+    )?;
 
     let wifi_configuration = WifiConfiguration::AccessPoint(AccessPointConfiguration {
         ssid: AP_SSID.try_into().unwrap(),
