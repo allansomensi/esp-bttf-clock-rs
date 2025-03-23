@@ -112,17 +112,17 @@
 
         function setBrightness() {
             let brightness = document.getElementById('brightnessInput').value;
-            if (brightness >= 1 && brightness <= 7) {
+            if (brightness >= 0 && brightness <= 7) {
                 fetch('/set_brightness?' + brightness, {
                     method: 'GET'
                 })
                     .then(response => response.text())
                     .then(data => {
-                        document.getElementById('message').innerText = "Brightness set to: " + brightness;
+                        document.getElementById('message').innerText = "Brightness set to " + brightness;
                     })
                     .catch(error => console.error('Error:', error));
             } else {
-                alert("Brightness must be between 1 and 7.");
+                alert("Brightness must be between 0 and 7.");
             }
         }
 
@@ -204,7 +204,7 @@
             <button onclick="sendDigits()">Send Digits</button>
         </div>
         <div class="row">
-            <input type="number" id="brightnessInput" placeholder="Brightness (1-7)" min="1" max="7" autocomplete="off">
+            <input type="number" id="brightnessInput" placeholder="Brightness (0-7)" min="0" max="7" autocomplete="off">
             <button onclick="setBrightness()">Set Brightness</button>
         </div>
 
