@@ -16,4 +16,4 @@ ESP_IDF_PATH_ISSUES = "warn"   # For Windows compatibility
 DEFAULT_TIMEZONE = "UTC"
 AP_IP_ADDRESS = "192.168.71.1"
 AP_SSID = "esp-clock"
-AP_PASSWORD = "bttf"
+AP_PASSWORD = "bttf-rust"
