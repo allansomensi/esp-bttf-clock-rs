@@ -1,10 +1,9 @@
+use crate::error::AppError;
 use std::{
     io,
     net::{Ipv4Addr, SocketAddrV4, UdpSocket},
     time::Duration,
 };
-
-use crate::error::AppError;
 
 /// A DNS responder that listens for DNS requests and responds with predefined DNS responses.
 pub struct DnsResponder {
