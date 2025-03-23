@@ -27,18 +27,22 @@ pub struct WifiCredentials {
     pub password: String,
 }
 
-/// Initializes a [WifiDriver] instance with the provided modem, event loop, and optional NVS partition.
+/// Initializes a [WifiDriver] instance with the provided modem, event loop, and
+/// optional NVS partition.
 ///
-/// This function creates a new [WifiDriver] instance using the provided peripheral modem, system event
-/// loop, and optional NVS partition for storing settings. It is used to set up Wi-Fi functionality on the device.
+/// This function creates a new [WifiDriver] instance using the provided
+/// peripheral modem, system event loop, and optional NVS partition for storing
+/// settings. It is used to set up Wi-Fi functionality on the device.
 ///
 /// ## Arguments
 /// - `modem`: The Wi-Fi modem peripheral to use.
 /// - `sysloop`: The system event loop for managing events related to Wi-Fi.
-/// - `nvs`: Optional NVS partition for storing Wi-Fi credentials and other settings.
+/// - `nvs`: Optional NVS partition for storing Wi-Fi credentials and other
+///   settings.
 ///
 /// ## Returns
-/// - `Result<WifiDriver<'d>, AppError>`: Returns the configured [WifiDriver] instance on success or an error.
+/// - `Result<WifiDriver<'d>, AppError>`: Returns the configured [WifiDriver]
+///   instance on success or an error.
 ///
 /// ## Example
 /// ```rust

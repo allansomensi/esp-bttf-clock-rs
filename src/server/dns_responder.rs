@@ -5,17 +5,21 @@ use std::{
     time::Duration,
 };
 
-/// A DNS responder that listens for DNS requests and responds with predefined DNS responses.
+/// A DNS responder that listens for DNS requests and responds with predefined
+/// DNS responses.
 pub struct DnsResponder {
     response_footer: [u8; 16],
     udp_socket: UdpSocket,
 }
 
 impl DnsResponder {
-    /// Initializes a new [DnsResponder] with the provided IP address to bind the UDP socket.
+    /// Initializes a new [DnsResponder] with the provided IP address to bind
+    /// the UDP socket.
     ///
-    /// This function creates a [UdpSocket] bound to the given `ip_address` and sets a read timeout for the socket.
-    /// It also sets up a predefined response footer, which includes the IP address to be used in DNS responses.
+    /// This function creates a [UdpSocket] bound to the given `ip_address` and
+    /// sets a read timeout for the socket. It also sets up a predefined
+    /// response footer, which includes the IP address to be used in DNS
+    /// responses.
     ///
     /// ## Arguments
     ///
@@ -23,7 +27,9 @@ impl DnsResponder {
     ///
     /// ## Returns
     ///
-    /// Returns `Ok(Self)` if the socket is successfully created and initialized, or an `Err(AppError)` if an error occurs during initialization.
+    /// Returns `Ok(Self)` if the socket is successfully created and
+    /// initialized, or an `Err(AppError)` if an error occurs during
+    /// initialization.
     ///
     /// ## Example
     ///
@@ -46,15 +52,19 @@ impl DnsResponder {
         })
     }
 
-    /// Handles incoming DNS requests by reading the request and sending a predefined response.
+    /// Handles incoming DNS requests by reading the request and sending a
+    /// predefined response.
     ///
-    /// This function listens for DNS requests on the bound UDP socket, processes the requests, and sends a response back to the requesting client.
-    /// The response includes the predefined IP address configured in the `DnsResponder` instance.
-    /// If the packet size exceeds 100 bytes, a warning is logged.
+    /// This function listens for DNS requests on the bound UDP socket,
+    /// processes the requests, and sends a response back to the requesting
+    /// client. The response includes the predefined IP address configured
+    /// in the `DnsResponder` instance. If the packet size exceeds 100
+    /// bytes, a warning is logged.
     ///
     /// ## Returns
     ///
-    /// Returns `Ok(())` if the request is successfully processed and responded to, or an `Err(AppError)` if an error occurs while handling the request.
+    /// Returns `Ok(())` if the request is successfully processed and responded
+    /// to, or an `Err(AppError)` if an error occurs while handling the request.
     ///
     /// ## Example
     ///

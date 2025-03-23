@@ -7,13 +7,15 @@ pub mod sntp;
 /// Static constant representing the timezone.
 pub static TIMEZONE: &str = env!("DEFAULT_TIMEZONE");
 
-/// Retrieves the current time formatted as a vector of digits representing the hour and minute.
+/// Retrieves the current time formatted as a vector of digits representing the
+/// hour and minute.
 ///
 /// This function converts the current UTC time to the [TIMEZONE],
 /// and then extracts the hour and minute components as a vector of 4 digits.
 ///
 /// ## Returns
-/// A vector of 4 bytes representing the hour and minute, where each byte is a digit.
+/// A vector of 4 bytes representing the hour and minute, where each byte is a
+/// digit.
 ///
 /// ## Example
 /// ```rust

@@ -36,7 +36,8 @@ impl LedStripTheme {
 
 /// Type alias for a shared [LedStrip] instance.
 ///
-/// This is an `Arc<Mutex<>>` to ensure thread safety and shared access to the LED strip.
+/// This is an `Arc<Mutex<>>` to ensure thread safety and shared access to the
+/// LED strip.
 pub type SharedLedStrip = Arc<Mutex<LedStrip<'static>>>;
 
 /// Struct representing a WS2812 LED strip.
@@ -49,12 +50,14 @@ impl LedStrip<'_> {
     /// Creates a new [LedStrip] instance.
     ///
     /// ## Arguments
-    /// - `channel`: The RMT channel to use for LED communication (implements [Peripheral] + [RmtChannel]).
+    /// - `channel`: The RMT channel to use for LED communication (implements
+    ///   [Peripheral] + [RmtChannel]).
     /// - `dio`: The data pin for the LED strip (implements [IOPin]).
     /// - `num_leds`: The number of LEDs in the strip.
     ///
     /// ## Returns
-    /// A `Result` containing a shared [LedStrip] instance on success, or an [AppError] on failure.
+    /// A `Result` containing a shared [LedStrip] instance on success, or an
+    /// [AppError] on failure.
     ///
     /// ## Example
     /// ```

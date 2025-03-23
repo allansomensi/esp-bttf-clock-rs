@@ -19,19 +19,23 @@ static CAPTIVE_PORTAL_HTML: &str = include_str!("../view/captive_portal.html");
 
 /// Starts a captive portal HTTP server for configuring Wi-Fi credentials.
 ///
-/// The portal automatically redirects devices to the configuration page when they try to access network connectivity check URLs.
+/// The portal automatically redirects devices to the configuration page when
+/// they try to access network connectivity check URLs.
 ///
 /// ## Behavior
 ///
-/// - Serves an HTML page at the root (`"/"`) URL to allow users to enter Wi-Fi credentials.
-/// - Accepts a JSON payload via `POST /set_config` containing Wi-Fi credentials.
+/// - Serves an HTML page at the root (`"/"`) URL to allow users to enter Wi-Fi
+///   credentials.
+/// - Accepts a JSON payload via `POST /set_config` containing Wi-Fi
+///   credentials.
 /// - Stores the received credentials in the [WIFI_CREDENTIALS] global variable.
 /// - Waits until valid credentials are received before exiting.
 /// - Supports automatic redirection to the captive portal page.
 ///
 /// ## Returns
 ///
-/// - `Ok(())` if the portal is successfully initialized and credentials are received.
+/// - `Ok(())` if the portal is successfully initialized and credentials are
+///   received.
 /// - `Err(AppError)` if server creation fails.
 ///
 /// ## Example

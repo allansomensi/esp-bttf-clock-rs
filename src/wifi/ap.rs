@@ -28,7 +28,8 @@ const AP_PASSWORD: &str = env!("AP_PASSWORD");
 ///
 /// ## Returns
 ///
-/// - `Ok(BlockingWifi<EspWifi>)`: A blocking Wi-Fi instance configured as an Access Point.
+/// - `Ok(BlockingWifi<EspWifi>)`: A blocking Wi-Fi instance configured as an
+///   Access Point.
 /// - `Err(AppError)`: If there is a failure in setting up the AP.
 ///
 /// ## Example
@@ -51,9 +52,11 @@ where
     Ok(wifi_ap)
 }
 
-/// Configures the Wi-Fi module as an Access Point (AP) with predefined settings.
+/// Configures the Wi-Fi module as an Access Point (AP) with predefined
+/// settings.
 ///
-/// This function sets up the Wi-Fi module in Access Point mode with the following configuration:
+/// This function sets up the Wi-Fi module in Access Point mode with the
+/// following configuration:
 /// - SSID: [AP_SSID]
 /// - Password: [AP_PASS]
 /// - Authentication: WPA2-Personal

@@ -20,7 +20,8 @@ use std::sync::{Arc, Mutex};
 /// Generates the web portal page response for the HTTP request.
 ///
 /// This function returns a closure that handles the HTTP request for the
-/// `web_portal.html` page. It serves the contents of an HTML file as the response.
+/// `web_portal.html` page. It serves the contents of an HTML file as the
+/// response.
 ///
 /// ## Returns
 ///
@@ -36,11 +37,13 @@ pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<()
     }
 }
 
-/// Returns the current status of the system including Wi-Fi SSID, Timezone and actual time.
+/// Returns the current status of the system including Wi-Fi SSID, Timezone and
+/// actual time.
 ///
 /// ## Returns
 ///
-/// A closure that handles the HTTP request and returns an HTML response with system status information.
+/// A closure that handles the HTTP request and returns an HTML response with
+/// system status information.
 pub fn get_status(
     wifi_ssid: String,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
@@ -62,7 +65,8 @@ pub fn get_status(
     }
 }
 
-/// Creates an HTTP handler that performs a factory reset by deleting Wi-Fi credentials and restarting the device.
+/// Creates an HTTP handler that performs a factory reset by deleting Wi-Fi
+/// credentials and restarting the device.
 ///
 /// ## Behavior
 ///
@@ -73,11 +77,13 @@ pub fn get_status(
 /// ## Returns
 ///
 /// - A closure that can be used as an HTTP request handler.
-/// - This function does not return control after execution, as the device restarts.
+/// - This function does not return control after execution, as the device
+///   restarts.
 ///
 /// ## Safety
 ///
-/// - Calls `esp_restart()`, which immediately reboots the device. Any unsaved data will be lost.
+/// - Calls `esp_restart()`, which immediately reboots the device. Any unsaved
+///   data will be lost.
 pub fn factory_reset(
     nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
@@ -164,10 +170,12 @@ pub unsafe fn set_brightness(
     }
 }
 
-/// Synchronizes the system time using SNTP and updates the display with the sync message.
+/// Synchronizes the system time using SNTP and updates the display with the
+/// sync message.
 ///
-/// This function restarts the SNTP synchronization process, waits for completion,
-/// and updates the display with the current time once synchronization is finished.
+/// This function restarts the SNTP synchronization process, waits for
+/// completion, and updates the display with the current time once
+/// synchronization is finished.
 ///
 /// ## Arguments
 ///
@@ -176,8 +184,8 @@ pub unsafe fn set_brightness(
 ///
 /// ## Returns
 ///
-/// A closure that handles the HTTP request, synchronizes the time, updates the display,
-/// and returns a success message.
+/// A closure that handles the HTTP request, synchronizes the time, updates the
+/// display, and returns a success message.
 pub unsafe fn sync_time(
     display: SharedTm1637<impl OutputPin, impl IOPin>,
     sntp: EspSntp<'static>,
@@ -204,7 +212,8 @@ pub unsafe fn sync_time(
     }
 }
 
-/// Creates an HTTP handler that changes the LED strip theme based on a query parameter.
+/// Creates an HTTP handler that changes the LED strip theme based on a query
+/// parameter.
 ///
 /// ## Arguments
 ///
@@ -215,7 +224,8 @@ pub unsafe fn sync_time(
 ///
 /// ## Safety
 ///
-/// - This function is marked as `unsafe` because it manipulates shared hardware resources (`led_strip`).
+/// - This function is marked as `unsafe` because it manipulates shared hardware
+///   resources (`led_strip`).
 /// - The caller must ensure safe access to the shared `led_strip` instance.
 ///
 /// ## Returns
