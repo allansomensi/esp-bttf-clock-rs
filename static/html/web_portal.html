@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP-RS Web Server</title>
+    <link rel="stylesheet" href="../css/web_portal.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>ESP Server</h1>
+        <p id="message" class="message"></p>
+
+        <!-- Display -->
+        <h2>Display</h2>
+        <div class="row">
+            <input type="text" id="digitsInput" placeholder="Enter digits" autocomplete="off">
+            <button onclick="sendDigits()">Send Digits</button>
+        </div>
+        <div class="row">
+            <input type="number" id="brightnessInput" placeholder="Brightness (0-7)" min="0" max="7" autocomplete="off">
+            <button onclick="setBrightness()">Set Brightness</button>
+        </div>
+
+        <!-- Sync Time Button -->
+        <h2>Sync Time</h2>
+        <div class="row">
+            <button onclick="syncTime()">Sync Time with SNTP</button>
+        </div>
+
+        <!-- Theme Selector -->
+        <h2>Theme</h2>
+        <div class="row">
+            <select id="themeSelect">
+                <option value="orange">Orange</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+            </select>
+        </div>
+
+        <!-- Status Section -->
+        <h2>Status</h2>
+        <div id="status">
+            <p><strong>SSID:</strong> <span id="ssid">Loading...</span></p>
+            <p><strong>Time Zone:</strong> <span id="timezone">Loading...</span></p>
+            <p><strong>Time:</strong> <span id="time">Loading...</span></p>
+        </div>
+
+        <!-- Factory Reset Button -->
+        <h2>Factory Reset</h2>
+        <div class="row">
+            <button onclick="factoryReset()">Restore Factory Settings</button>
+        </div>
+    </div>
+    <script src="../js/web_portal.js"></script>
+</body>
+
+</html>

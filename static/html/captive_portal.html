@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Settings</title>
+    <link rel="stylesheet" href="../css/captive_portal.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Wi-Fi Settings</h1>
+        <p id="message" class="message"></p>
+
+        <h2>Enter Wi-Fi Information</h2>
+        <div class="row">
+            <input type="text" id="ssidInput" placeholder="Enter SSID" autocomplete="off">
+        </div>
+        <div class="row">
+            <input type="password" id="passwordInput" placeholder="Enter Password" autocomplete="off">
+        </div>
+        <div class="row">
+            <button onclick="connectWiFi()">Connect to Wi-Fi</button>
+        </div>
+    </div>
+    <script src="../js/captive_portal.js"></script>
+</body>
+
+</html>
