@@ -10,9 +10,9 @@ const STACK_SIZE: usize = 10240;
 
 /// Initializes and starts an HTTP server.
 ///
-/// This function creates a new instance of the [EspHttpServer] using the default configuration
-/// provided by [ServerConfiguration::default]. It is used to set up a basic HTTP server that can
-/// handle incoming requests.
+/// This function creates a new instance of the [EspHttpServer] using the
+/// default configuration provided by [ServerConfiguration::default]. It is used
+/// to set up a basic HTTP server that can handle incoming requests.
 ///
 /// ## Returns
 /// - `Ok(EspHttpServer)`: The successfully created HTTP server instance.

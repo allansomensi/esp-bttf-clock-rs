@@ -101,13 +101,15 @@ fn main() -> Result<(), error::AppError> {
         let mut dns_responder =
             DnsResponder::init(ap_ip_address).expect("Failed to initialize DNS Responder");
 
-        // Runs the DNS server on another thread and accepts the timeout error with .ok().
+        // Runs the DNS server on another thread and accepts the timeout error with
+        // .ok().
         std::thread::spawn(move || loop {
             dns_responder.handle_requests().ok();
             std::thread::sleep(Duration::from_millis(100));
         });
 
-        // Starts the server with the Wi-Fi configuration handler and the captive portal redirection handlers
+        // Starts the server with the Wi-Fi configuration handler and the captive portal
+        // redirection handlers
         server::captive_portal::start_captive_portal()?;
 
         // If new credentials are received, store them in NVS

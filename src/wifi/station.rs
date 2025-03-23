@@ -13,9 +13,10 @@ use esp_idf_svc::{
 
 /// Initializes the Wi-Fi station and connects to the specified network.
 ///
-/// This function sets up the Wi-Fi driver in station mode, configures it with the provided SSID
-/// and password, and starts the Wi-Fi connection process. It returns a [BlockingWifi] instance wrapped
-/// in [EspWifi], which can be used for blocking Wi-Fi operations.
+/// This function sets up the Wi-Fi driver in station mode, configures it with
+/// the provided SSID and password, and starts the Wi-Fi connection process. It
+/// returns a [BlockingWifi] instance wrapped in [EspWifi], which can be used
+/// for blocking Wi-Fi operations.
 ///
 /// ## Arguments
 /// - `modem`: The Wi-Fi modem peripheral to use.
@@ -25,7 +26,8 @@ use esp_idf_svc::{
 /// - `password`: The password for the Wi-Fi network.
 ///
 /// ## Returns
-/// - `Result<BlockingWifi<EspWifi<'d>>, AppError>`: A wrapped [BlockingWifi] instance on success or an error.
+/// - `Result<BlockingWifi<EspWifi<'d>>, AppError>`: A wrapped [BlockingWifi]
+///   instance on success or an error.
 ///
 /// ## Example
 /// ```rust
@@ -54,10 +56,12 @@ where
     Ok(wifi)
 }
 
-/// Configures the Wi-Fi driver for station mode with the specified SSID and password.
+/// Configures the Wi-Fi driver for station mode with the specified SSID and
+/// password.
 ///
-/// This function sets up the Wi-Fi configuration for connecting to a Wi-Fi network in client mode.
-/// It uses the WPA2 Personal authentication method and sets the provided SSID and password.
+/// This function sets up the Wi-Fi configuration for connecting to a Wi-Fi
+/// network in client mode. It uses the WPA2 Personal authentication method and
+/// sets the provided SSID and password.
 ///
 /// # Arguments
 /// - `wifi`: The `WifiDriver` instance to configure.
@@ -65,13 +69,14 @@ where
 /// - `password`: The password for the Wi-Fi network.
 ///
 /// # Returns
-/// - `Result<EspWifi, AppError>`: The configured `EspWifi` instance on success or an error.
+/// - `Result<EspWifi, AppError>`: The configured `EspWifi` instance on success
+///   or an error.
 ///
 /// # Example
 /// ```rust
 /// let ssid = "MyNetwork".to_string();
 /// let password = "MyPassword".to_string();
-/// let wifi_driver = get_wifi_driver();  // Hypothetical function to get the WifiDriver instance
+/// let wifi_driver = get_wifi_driver(); // Hypothetical function to get the WifiDriver instance
 /// match configure_station(wifi_driver, ssid, password) {
 ///     Ok(wifi) => println!("Wi-Fi configured successfully!"),
 ///     Err(e) => eprintln!("Failed to configure Wi-Fi: {:?}", e),
@@ -99,13 +104,15 @@ fn configure_station(
 
 /// Starts and connects to a Wi-Fi network using the provided `wifi` driver.
 ///
-/// This function initializes the Wi-Fi connection, waits for the network interface to be up,
-/// and continuously checks for a successful connection. If the connection fails, it deletes
-/// stored Wi-Fi credentials, stops the Wi-Fi driver, and restarts the device.
+/// This function initializes the Wi-Fi connection, waits for the network
+/// interface to be up, and continuously checks for a successful connection. If
+/// the connection fails, it deletes stored Wi-Fi credentials, stops the Wi-Fi
+/// driver, and restarts the device.
 ///
 /// ## Arguments
 ///
-/// - `wifi`: A mutable reference to the [BlockingWifi] driver that manages the Wi-Fi connection.
+/// - `wifi`: A mutable reference to the [BlockingWifi] driver that manages the
+///   Wi-Fi connection.
 /// - `nvs`: A mutable reference to the NVS used to store Wi-Fi credentials.
 ///
 /// ## Errors
@@ -124,7 +131,8 @@ fn configure_station(
 /// ```
 ///
 /// # Safety
-/// This function uses `unsafe` to restart the device if the connection process fails.
+/// This function uses `unsafe` to restart the device if the connection process
+/// fails.
 pub fn connect_wifi_or_restart(
     wifi: &mut BlockingWifi<EspWifi<'static>>,
     nvs: &mut EspNvs<NvsDefault>,

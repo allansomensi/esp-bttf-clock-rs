@@ -14,14 +14,16 @@ pub const DISPLAY_DIGIT: [u8; 10] = [
 
 /// Extracts the digits from the URL query string after the "?" symbol.
 ///
-/// This function finds the query string in the URL, extracts the part after the "?" symbol,
-/// and then returns the digits found before the next "&" symbol, if present.
+/// This function finds the query string in the URL, extracts the part after the
+/// "?" symbol, and then returns the digits found before the next "&" symbol, if
+/// present.
 ///
 /// ## Arguments
 /// - `url`: A string slice representing the URL to be processed.
 ///
 /// ## Returns
-/// A vector of bytes representing the extracted digits from the query string, or an empty vector if no digits are found.
+/// A vector of bytes representing the extracted digits from the query string,
+/// or an empty vector if no digits are found.
 ///
 /// ## Example
 /// ```rust

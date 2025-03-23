@@ -13,13 +13,18 @@ use postcard::{from_bytes, to_vec};
 /// ## Behavior
 ///
 /// Stores the provided SSID and password under the key `"net_info"`.  
-/// If the operation succeeds, logs a success message; otherwise, logs an error message.
+/// If the operation succeeds, logs a success message; otherwise, logs an error
+/// message.
 ///
 /// ## Example
 ///
 /// ```rust
 /// let mut nvs = initialize_nvs(); // Assume this function initializes NVS.
-/// save_wifi_credentials(&mut nvs, "MyNetwork".to_string(), "SecurePass123".to_string());
+/// save_wifi_credentials(
+///     &mut nvs,
+///     "MyNetwork".to_string(),
+///     "SecurePass123".to_string(),
+/// );
 /// ```
 pub fn save_wifi_credentials(nvs: &mut EspNvs<NvsDefault>, ssid: String, password: String) {
     let key_wifi_credentials: &str = "net_info";
@@ -42,21 +47,25 @@ pub fn save_wifi_credentials(nvs: &mut EspNvs<NvsDefault>, ssid: String, passwor
 ///
 /// ## Returns
 ///
-/// * `Ok(Some(WifiCredentials))` - If credentials are found and successfully deserialized.
+/// * `Ok(Some(WifiCredentials))` - If credentials are found and successfully
+///   deserialized.
 /// * `Ok(None)` - If no credentials are stored.
 /// * `Err(String)` - If an error occurs during retrieval or deserialization.
 ///
 /// ## Behavior
 ///
-/// Attempts to fetch and deserialize Wi-Fi credentials from the `"net_info"` key.
-/// If retrieval or deserialization fails, returns an error message.
+/// Attempts to fetch and deserialize Wi-Fi credentials from the `"net_info"`
+/// key. If retrieval or deserialization fails, returns an error message.
 ///
 /// ## Example
 ///
 /// ```rust
 /// let mut nvs = initialize_nvs(); // Assume this function initializes NVS.
 /// match get_maybe_wifi_credentials(&mut nvs) {
-///     Ok(Some(credentials)) => println!("SSID: {}, Password: {}", credentials.ssid, credentials.password),
+///     Ok(Some(credentials)) => println!(
+///         "SSID: {}, Password: {}",
+///         credentials.ssid, credentials.password
+///     ),
 ///     Ok(None) => println!("No credentials found."),
 ///     Err(e) => eprintln!("Error retrieving credentials: {}", e),
 /// }
@@ -88,7 +97,8 @@ pub fn get_maybe_wifi_credentials(
 /// ## Behavior
 ///
 /// Removes the Wi-Fi credentials stored under the `"net_info"` key.  
-/// If the operation succeeds, logs a success message; otherwise, logs an error message.
+/// If the operation succeeds, logs a success message; otherwise, logs an error
+/// message.
 ///
 /// ## Example
 ///
