@@ -11,11 +11,16 @@ use crate::{
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
     http::server::{EspHttpConnection, Request},
+    io::Write,
     nvs::{EspNvs, NvsDefault},
     sntp::{EspSntp, SyncStatus},
     sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
 use std::sync::{Arc, Mutex};
+
+static WEB_PORTAL_HTML: &str = include_str!("../../static/html/web_portal.html");
+static WEB_PORTAL_CSS: &str = include_str!("../../static/css/web_portal.css");
+static WEB_PORTAL_JS: &str = include_str!("../../static/js/web_portal.js");
 
 /// Generates the web portal page response for the HTTP request.
 ///
@@ -29,10 +34,31 @@ use std::sync::{Arc, Mutex};
 /// with the content of the `web_portal.html` file.
 pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let html = include_str!("../view/web_portal.html").to_string();
+        request
+            .into_ok_response()?
+            .write_all(WEB_PORTAL_HTML.as_bytes())?;
+        Ok::<(), AppError>(())
+    }
+}
 
-        let mut response = request.into_ok_response()?;
-        response.write(html.as_bytes())?;
+pub fn web_portal_css() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |request: Request<&mut EspHttpConnection<'_>>| {
+        request
+            .into_response(200, None, &[("Content-Type", "text/css; charset=utf-8")])?
+            .write_all(WEB_PORTAL_CSS.as_bytes())?;
+        Ok::<(), AppError>(())
+    }
+}
+
+pub fn web_portal_js() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |request: Request<&mut EspHttpConnection<'_>>| {
+        request
+            .into_response(
+                200,
+                None,
+                &[("Content-Type", "application/javascript; charset=utf-8")],
+            )?
+            .write_all(WEB_PORTAL_JS.as_bytes())?;
         Ok::<(), AppError>(())
     }
 }

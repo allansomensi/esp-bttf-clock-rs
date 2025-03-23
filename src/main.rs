@@ -174,7 +174,27 @@ fn main() -> Result<(), error::AppError> {
     web_portal_server
         .fn_handler("/", Method::Get, server::web_portal::web_portal())
         .inspect_err(|&e| {
-            log::error!("Failed to register index handler: {:#?}", e);
+            log::error!("Failed to register web portal handler: {:#?}", e);
+        })?;
+
+    web_portal_server
+        .fn_handler(
+            "/css/web_portal.css",
+            Method::Get,
+            server::web_portal::web_portal_css(),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to serve CSS: {:#?}", e);
+        })?;
+
+    web_portal_server
+        .fn_handler(
+            "/js/web_portal.js",
+            Method::Get,
+            server::web_portal::web_portal_js(),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to serve JS: {:#?}", e);
         })?;
 
     let wifi_ssid = wifi
