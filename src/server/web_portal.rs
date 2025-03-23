@@ -130,7 +130,7 @@ pub unsafe fn set_digits(
 ///
 /// This function extracts the brightness value from the URL query parameters
 /// and updates the display's brightness accordingly. The brightness value must
-/// be between 1 and 7.
+/// be between 0 and 7.
 ///
 /// ## Arguments
 ///
@@ -149,7 +149,7 @@ pub unsafe fn set_brightness(
         if let Some(start) = url.find('?') {
             let brightness_value = &url[start + 1..];
             if let Ok(brightness) = brightness_value.parse::<u8>() {
-                if (1..=7).contains(&brightness) {
+                if (0..=7).contains(&brightness) {
                     display.lock().unwrap().set_brightness(brightness)?;
                     log::info!("Brightness updated to level {brightness}");
                 }
