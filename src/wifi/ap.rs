@@ -15,8 +15,8 @@ use esp_idf_svc::{
 };
 
 pub const AP_IP_ADDRESS: &str = env!("AP_IP_ADDRESS");
-const AP_SSID: &str = "esp-clock";
-const AP_PASS: &str = "bttf-rust";
+const AP_SSID: &str = env!("AP_SSID");
+const AP_PASSWORD: &str = env!("AP_PASSWORD");
 
 /// Creates and configures an Access Point (AP) mode Wi-Fi instance.
 ///
@@ -97,7 +97,7 @@ fn configure_ap(wifi_ap: WifiDriver) -> Result<EspWifi, AppError> {
     let wifi_configuration = WifiConfiguration::AccessPoint(AccessPointConfiguration {
         ssid: AP_SSID.try_into().unwrap(),
         auth_method: AuthMethod::WPA2Personal,
-        password: AP_PASS.try_into().unwrap(),
+        password: AP_PASSWORD.try_into().unwrap(),
         max_connections: 4,
         ..Default::default()
     });

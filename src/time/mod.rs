@@ -1,11 +1,11 @@
 use chrono::{DateTime, Timelike, Utc};
-use chrono_tz::{America, Tz};
-use std::time::SystemTime;
+use chrono_tz::Tz;
+use std::{str::FromStr, time::SystemTime};
 
 pub mod sntp;
 
 /// Static constant representing the timezone.
-pub static TIMEZONE: Tz = America::Sao_Paulo;
+pub static TIMEZONE: &str = env!("DEFAULT_TIMEZONE");
 
 /// Retrieves the current time formatted as a vector of digits representing the hour and minute.
 ///
@@ -21,7 +21,7 @@ pub static TIMEZONE: Tz = America::Sao_Paulo;
 /// ```
 pub fn get_time() -> Vec<u8> {
     let now_utc: DateTime<Utc> = SystemTime::now().into();
-    let now = now_utc.with_timezone(&TIMEZONE);
+    let now = now_utc.with_timezone(&Tz::from_str(TIMEZONE).expect("Error reading Timezone"));
     let hour = now.hour();
     let minute = now.minute();
 

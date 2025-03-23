@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use crate::{
     error::AppError,
     module::{
@@ -7,16 +5,17 @@ use crate::{
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
-    time::{self, sntp::Sntp},
+    time::{self},
     util,
 };
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
     http::server::{EspHttpConnection, Request},
     nvs::{EspNvs, NvsDefault},
-    sntp::SyncStatus,
+    sntp::{EspSntp, SyncStatus},
     sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
+use std::sync::{Arc, Mutex};
 
 /// Generates the web portal page response for the HTTP request.
 ///
@@ -181,7 +180,7 @@ pub unsafe fn set_brightness(
 /// and returns a success message.
 pub unsafe fn sync_time(
     display: SharedTm1637<impl OutputPin, impl IOPin>,
-    sntp: Sntp,
+    sntp: EspSntp<'static>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let sync_message = DisplayMessage::Sync.as_bytes();
