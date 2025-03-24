@@ -303,12 +303,16 @@ fn main() -> Result<(), error::AppError> {
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {
+        let wait_time = time::calculate_time_until_next_minute();
+
+        // Wait until the next minute
+        FreeRtos::delay_ms(wait_time.as_millis() as u32);
+
         module::display::update_display_time(&display.clone())
             .inspect_err(|e| {
                 log::error!("Failed to update display time: {:#?}", e);
             })
             .unwrap();
-        FreeRtos::delay_ms(60000);
     });
 
     loop {
