@@ -1,67 +1,614 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById('digitsInput').value = '';
-    document.getElementById('brightnessInput').value = '';
-    document.getElementById('themeSelect').value = 'orange';
-    document.getElementById('themeSelect').addEventListener('change', setTheme);
+    document.getElementById("digitsInput").value = "";
+    document.getElementById("brightnessInput").value = "";
+    document.getElementById("themeSelect").value = "orange";
+    document.getElementById("themeSelect").addEventListener("change", setTheme);
 
     populateTimezoneSelect();
 });
 
 function populateTimezoneSelect() {
     const timezones = [
-        "UTC", "Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers",
-        "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau",
-        "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo",
-        "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar",
-        "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun",
-        "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg",
-        "Africa/Juba", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa",
-        "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda",
-        "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane",
-        "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena",
-        "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo",
-        "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek",
-        "America/Adak", "America/Anchorage", "America/Araguaina", "America/Argentina/Buenos_Aires",
-        "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy",
-        "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos",
-        "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis",
-        "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Asuncion",
-        "America/Atikokan", "America/Bahia", "America/Bahia_Banderas", "America/Barbados",
-        "America/Belem", "America/Belize", "America/Boa_Vista", "America/Bogota",
-        "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun",
-        "America/Caracas", "America/Cayenne", "America/Chicago", "America/Chihuahua",
-        "America/Costa_Rica", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn",
-        "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit",
-        "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fort_Nelson",
-        "America/Fortaleza", "America/Glace_Bay", "America/Godthab", "America/Goose_Bay",
-        "America/Grand_Turk", "America/Guatemala", "America/Guayaquil", "America/Guyana",
-        "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis",
-        "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg",
-        "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes",
-        "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica",
-        "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello",
-        "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Maceio",
-        "America/Managua", "America/Manaus", "America/Martinique", "America/Matamoros",
-        "America/Mazatlan", "America/Menominee", "America/Merida", "America/Metlakatla",
-        "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey",
-        "America/Montevideo", "America/New_York", "America/Nipigon", "America/Nome",
-        "America/Noronha", "America/North_Dakota/Beulah", "America/North_Dakota/Center",
-        "America/North_Dakota/New_Salem", "America/Ojinaga", "America/Panama",
-        "America/Pangnirtung", "America/Paramaribo", "America/Phoenix", "America/Port-au-Prince",
-        "America/Porto_Velho", "America/Puerto_Rico", "America/Rainy_River",
-        "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco",
-        "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo",
-        "America/Scoresbysund", "America/Sitka", "America/St_Johns", "America/Swift_Current",
-        "America/Tegucigalpa", "America/Thule", "America/Tijuana", "America/Toronto",
-        "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat",
-        "Asia/Shanghai", "Asia/Tokyo", "Europe/Lisbon", "Europe/London", "Europe/Madrid",
-        "Europe/Paris", "Europe/Rome", "Europe/Berlin"
+        "UTC",
+        "Africa/Abidjan",
+        "Africa/Accra",
+        "Africa/Addis_Ababa",
+        "Africa/Algiers",
+        "Africa/Asmara",
+        "Africa/Bamako",
+        "Africa/Bangui",
+        "Africa/Banjul",
+        "Africa/Bissau",
+        "Africa/Blantyre",
+        "Africa/Brazzaville",
+        "Africa/Bujumbura",
+        "Africa/Cairo",
+        "Africa/Casablanca",
+        "Africa/Ceuta",
+        "Africa/Conakry",
+        "Africa/Dakar",
+        "Africa/Dar_es_Salaam",
+        "Africa/Djibouti",
+        "Africa/Douala",
+        "Africa/El_Aaiun",
+        "Africa/Freetown",
+        "Africa/Gaborone",
+        "Africa/Harare",
+        "Africa/Johannesburg",
+        "Africa/Juba",
+        "Africa/Kampala",
+        "Africa/Khartoum",
+        "Africa/Kigali",
+        "Africa/Kinshasa",
+        "Africa/Lagos",
+        "Africa/Libreville",
+        "Africa/Lome",
+        "Africa/Luanda",
+        "Africa/Lubumbashi",
+        "Africa/Lusaka",
+        "Africa/Malabo",
+        "Africa/Maputo",
+        "Africa/Maseru",
+        "Africa/Mbabane",
+        "Africa/Mogadishu",
+        "Africa/Monrovia",
+        "Africa/Nairobi",
+        "Africa/Ndjamena",
+        "Africa/Niamey",
+        "Africa/Nouakchott",
+        "Africa/Ouagadougou",
+        "Africa/Porto-Novo",
+        "Africa/Sao_Tome",
+        "Africa/Timbuktu",
+        "Africa/Tripoli",
+        "Africa/Tunis",
+        "Africa/Windhoek",
+        "America/Adak",
+        "America/Anchorage",
+        "America/Anguilla",
+        "America/Antigua",
+        "America/Araguaina",
+        "America/Argentina/Buenos_Aires",
+        "America/Argentina/Catamarca",
+        "America/Argentina/ComodRivadavia",
+        "America/Argentina/Cordoba",
+        "America/Argentina/Jujuy",
+        "America/Argentina/La_Rioja",
+        "America/Argentina/Mendoza",
+        "America/Argentina/Rio_Gallegos",
+        "America/Argentina/Salta",
+        "America/Argentina/San_Juan",
+        "America/Argentina/San_Luis",
+        "America/Argentina/Tucuman",
+        "America/Argentina/Ushuaia",
+        "America/Aruba",
+        "America/Asuncion",
+        "America/Atikokan",
+        "America/Atka",
+        "America/Bahia",
+        "America/Bahia_Banderas",
+        "America/Barbados",
+        "America/Belem",
+        "America/Belize",
+        "America/BlancSablon",
+        "America/Boa_Vista",
+        "America/Bogota",
+        "America/Boise",
+        "America/Buenos_Aires",
+        "America/Cambridge_Bay",
+        "America/Campo_Grande",
+        "America/Cancun",
+        "America/Caracas",
+        "America/Cayenne",
+        "America/Cayman",
+        "America/Chicago",
+        "America/Chihuahua",
+        "America/Ciudad_Juarez",
+        "America/Coral_Harbour",
+        "America/Cordoba",
+        "America/Costa_Rica",
+        "America/Coyhaique",
+        "America/Creston",
+        "America/Cuiaba",
+        "America/Curacao",
+        "America/Danmarkshavn",
+        "America/Dawson",
+        "America/Dawson_Creek",
+        "America/Denver",
+        "America/Detroit",
+        "America/Dominica",
+        "America/Edmonton",
+        "America/Eirunepe",
+        "America/El_Salvador",
+        "America/Ensenada",
+        "America/Fort_Nelson",
+        "America/Fort_Wayne",
+        "America/Fortaleza",
+        "America/Glace_Bay",
+        "America/Godthab",
+        "America/Goose_Bay",
+        "America/Grand_Turk",
+        "America/Grenada",
+        "America/Guadeloupe",
+        "America/Guatemala",
+        "America/Guayaquil",
+        "America/Guyana",
+        "America/Halifax",
+        "America/Havana",
+        "America/Hermosillo",
+        "America/Indiana/Indianapolis",
+        "America/Indiana/Knox",
+        "America/Indiana/Marengo",
+        "America/Indiana/Petersburg",
+        "America/Indiana/Tell_City",
+        "America/Indiana/Vevay",
+        "America/Indiana/Vincennes",
+        "America/Indiana/Winamac",
+        "America/Indianapolis",
+        "America/Inuvik",
+        "America/Iqaluit",
+        "America/Jamaica",
+        "America/Jujuy",
+        "America/Juneau",
+        "America/Kentucky/Louisville",
+        "America/Kentucky/Monticello",
+        "America/Knox_IN",
+        "America/Kralendijk",
+        "America/La_Paz",
+        "America/Lima",
+        "America/Los_Angeles",
+        "America/Louisville",
+        "America/Lower_Pinces",
+        "America/Maceio",
+        "America/Managua",
+        "America/Manaus",
+        "America/Marigot",
+        "America/Martinique",
+        "America/Matamoros",
+        "America/Mazatlan",
+        "America/Mendoza",
+        "America/Menominee",
+        "America/Merida",
+        "America/Metlakatla",
+        "America/Mexico_City",
+        "America/Miquelon",
+        "America/Moncton",
+        "America/Monterrey",
+        "America/Montevideo",
+        "America/Montreal",
+        "America/Montserrat",
+        "America/Nassau",
+        "America/New_York",
+        "America/Nipigon",
+        "America/Nome",
+        "America/Noronha",
+        "America/North_Dakota/Beulah",
+        "America/North_Dakota/Center",
+        "America/North_Dakota/New_Salem",
+        "America/Nuuk",
+        "America/Ojinaga",
+        "America/Panama",
+        "America/Pangnirtung",
+        "America/Paramaribo",
+        "America/Phoenix",
+        "America/Port-au-Prince",
+        "America/Port_of_Spain",
+        "America/Porto_Acre",
+        "America/Porto_Velho",
+        "America/Puerto_Rico",
+        "America/Puntas_Arenas",
+        "America/Rainy_River",
+        "America/Rankin_Inlet",
+        "America/Recife",
+        "America/Regina",
+        "America/Resolute",
+        "America/Rio_Branco",
+        "America/Rosario",
+        "America/Santarem",
+        "America/Santiago",
+        "America/Santo_Domingo",
+        "America/Sao_Paulo",
+        "America/Scoresbysund",
+        "America/Shiprock",
+        "America/Sitka",
+        "America/St_Barthelemy",
+        "America/St_Johns",
+        "America/St_Kitts",
+        "America/St_Lucia",
+        "America/St_Thomas",
+        "America/St_Vincent",
+        "America/Swift_Current",
+        "America/Tegucigalpa",
+        "America/Thule",
+        "America/Thunder_Bay",
+        "America/Tijuana",
+        "America/Toronto",
+        "America/Tortola",
+        "America/Vancouver",
+        "America/Virgin",
+        "America/Whitehorse",
+        "America/Winnipeg",
+        "America/Yakutat",
+        "America/Yellowknife",
+        "Antarctica/Casey",
+        "Antarctica/Davis",
+        "Antarctica/DumontDUrville",
+        "Antarctica/Macquarie",
+        "Antarctica/Mawson",
+        "Antarctica/McMurdo",
+        "Antarctica/Palmer",
+        "Antarctica/Rothera",
+        "Antarctica/South_Pole",
+        "Antarctica/Syowa",
+        "Antarctica/Troll",
+        "Antarctica/Vostok",
+        "Arctic/Longyearbyen",
+        "Asia/Aden",
+        "Asia/Almaty",
+        "Asia/Amman",
+        "Asia/Anadyr",
+        "Asia/Aqtau",
+        "Asia/Aqtobe",
+        "Asia/Ashgabat",
+        "Asia/Ashkhabad",
+        "Asia/Atyrau",
+        "Asia/Baghdad",
+        "Asia/Bahrain",
+        "Asia/Baku",
+        "Asia/Bangkok",
+        "Asia/Barnaul",
+        "Asia/Beirut",
+        "Asia/Bishkek",
+        "Asia/Brunei",
+        "Asia/Calcutta",
+        "Asia/Chita",
+        "Asia/Choibalsan",
+        "Asia/Chongqing",
+        "Asia/Chungking",
+        "Asia/Colombo",
+        "Asia/Dacca",
+        "Asia/Damascus",
+        "Asia/Dhaka",
+        "Asia/Dili",
+        "Asia/Dubai",
+        "Asia/Dushanbe",
+        "Asia/Famagusta",
+        "Asia/Gaza",
+        "Asia/Harbin",
+        "Asia/Hebron",
+        "Asia/Ho_Chi_Minh",
+        "Asia/Hong_Kong",
+        "Asia/Hovd",
+        "Asia/Irkutsk",
+        "Asia/Istanbul",
+        "Asia/Jakarta",
+        "Asia/Jayapura",
+        "Asia/Jerusalem",
+        "Asia/Kabul",
+        "Asia/Kamchatka",
+        "Asia/Karachi",
+        "Asia/Kashgar",
+        "Asia/Kathmandu",
+        "Asia/Katmandu",
+        "Asia/Khandyga",
+        "Asia/Kolkata",
+        "Asia/Krasnoyarsk",
+        "Asia/Kuala_Lumpur",
+        "Asia/Kuching",
+        "Asia/Kuwait",
+        "Asia/Macao",
+        "Asia/Macau",
+        "Asia/Magadan",
+        "Asia/Makassar",
+        "Asia/Manila",
+        "Asia/Muscat",
+        "Asia/Nicosia",
+        "Asia/Novokuznetsk",
+        "Asia/Novosibirsk",
+        "Asia/Omsk",
+        "Asia/Oral",
+        "Asia/Phnom_Penh",
+        "Asia/Pontianak",
+        "Asia/Pyongyang",
+        "Asia/Qatar",
+        "Asia/Qostanay",
+        "Asia/Qyzylorda",
+        "Asia/Rangoon",
+        "Asia/Riyadh",
+        "Asia/Saigon",
+        "Asia/Sakhalin",
+        "Asia/Samarkand",
+        "Asia/Seoul",
+        "Asia/Shanghai",
+        "Asia/Singapore",
+        "Asia/Srednekolymsk",
+        "Asia/Taipei",
+        "Asia/Tashkent",
+        "Asia/Tbilisi",
+        "Asia/Tehran",
+        "Asia/Tel_Aviv",
+        "Asia/Thimbu",
+        "Asia/Thimphu",
+        "Asia/Tokyo",
+        "Asia/Tomsk",
+        "Asia/Ujung_Pandang",
+        "Asia/Ulaanbaatar",
+        "Asia/Ulan_Bator",
+        "Asia/Urumqi",
+        "Asia/UstNera",
+        "Asia/Vientiane",
+        "Asia/Vladivostok",
+        "Asia/Yakutsk",
+        "Asia/Yangon",
+        "Asia/Yekaterinburg",
+        "Asia/Yerevan",
+        "Atlantic/Azores",
+        "Atlantic/Bermuda",
+        "Atlantic/Canary",
+        "Atlantic/Cape_Verde",
+        "Atlantic/Faeroe",
+        "Atlantic/Faroe",
+        "Atlantic/Jan_Mayen",
+        "Atlantic/Madeira",
+        "Atlantic/Reykjavik",
+        "Atlantic/South_Georgia",
+        "Atlantic/St_Helena",
+        "Atlantic/Stanley",
+        "Australia/ACT",
+        "Australia/Adelaide",
+        "Australia/Brisbane",
+        "Australia/Broken_Hill",
+        "Australia/Canberra",
+        "Australia/Currie",
+        "Australia/Darwin",
+        "Australia/Eucla",
+        "Australia/Hobart",
+        "Australia/LHI",
+        "Australia/Lindeman",
+        "Australia/Lord_Howe",
+        "Australia/Melbourne",
+        "Australia/NSW",
+        "Australia/North",
+        "Australia/Perth",
+        "Australia/Queensland",
+        "Australia/South",
+        "Australia/Sydney",
+        "Australia/Tasmania",
+        "Australia/Victoria",
+        "Australia/West",
+        "Australia/Yancowinna",
+        "Brazil/Acre",
+        "Brazil/DeNoronha",
+        "Brazil/East",
+        "Brazil/West",
+        "CET",
+        "CST6CDT",
+        "Canada/Atlantic",
+        "Canada/Central",
+        "Canada/Eastern",
+        "Canada/Mountain",
+        "Canada/Newfoundland",
+        "Canada/Pacific",
+        "Canada/Saskatchewan",
+        "Canada/Yukon",
+        "Chile/Continental",
+        "Chile/EasterIsland",
+        "Cuba",
+        "EET",
+        "EST",
+        "EST5EDT",
+        "Egypt",
+        "Eire",
+        "Etc/GMT",
+        "Etc/GMTPlus0",
+        "Etc/GMTPlus1",
+        "Etc/GMTPlus10",
+        "Etc/GMTPlus11",
+        "Etc/GMTPlus12",
+        "Etc/GMTPlus2",
+        "Etc/GMTPlus3",
+        "Etc/GMTPlus4",
+        "Etc/GMTPlus5",
+        "Etc/GMTPlus6",
+        "Etc/GMTPlus7",
+        "Etc/GMTPlus8",
+        "Etc/GMTPlus9",
+        "Etc/GMTMinus0",
+        "Etc/GMTMinus1",
+        "Etc/GMTMinus10",
+        "Etc/GMTMinus11",
+        "Etc/GMTMinus12",
+        "Etc/GMTMinus13",
+        "Etc/GMTMinus14",
+        "Etc/GMTMinus2",
+        "Etc/GMTMinus3",
+        "Etc/GMTMinus4",
+        "Etc/GMTMinus5",
+        "Etc/GMTMinus6",
+        "Etc/GMTMinus7",
+        "Etc/GMTMinus8",
+        "Etc/GMTMinus9",
+        "Etc/GMT0",
+        "Etc/Greenwich",
+        "Etc/UCT",
+        "Etc/UTC",
+        "Etc/Universal",
+        "Etc/Zulu",
+        "Europe/Amsterdam",
+        "Europe/Andorra",
+        "Europe/Astrakhan",
+        "Europe/Athens",
+        "Europe/Belfast",
+        "Europe/Belgrade",
+        "Europe/Berlin",
+        "Europe/Bratislava",
+        "Europe/Brussels",
+        "Europe/Bucharest",
+        "Europe/Budapest",
+        "Europe/Busingen",
+        "Europe/Chisinau",
+        "Europe/Copenhagen",
+        "Europe/Dublin",
+        "Europe/Gibraltar",
+        "Europe/Guernsey",
+        "Europe/Helsinki",
+        "Europe/Isle_of_Man",
+        "Europe/Istanbul",
+        "Europe/Jersey",
+        "Europe/Kaliningrad",
+        "Europe/Kiev",
+        "Europe/Kirov",
+        "Europe/Kyiv",
+        "Europe/Lisbon",
+        "Europe/Ljubljana",
+        "Europe/London",
+        "Europe/Luxembourg",
+        "Europe/Madrid",
+        "Europe/Malta",
+        "Europe/Mariehamn",
+        "Europe/Minsk",
+        "Europe/Monaco",
+        "Europe/Moscow",
+        "Europe/Nicosia",
+        "Europe/Oslo",
+        "Europe/Paris",
+        "Europe/Podgorica",
+        "Europe/Prague",
+        "Europe/Riga",
+        "Europe/Rome",
+        "Europe/Samara",
+        "Europe/San_Marino",
+        "Europe/Sarajevo",
+        "Europe/Saratov",
+        "Europe/Simferopol",
+        "Europe/Skopje",
+        "Europe/Sofia",
+        "Europe/Stockholm",
+        "Europe/Tallinn",
+        "Europe/Tirane",
+        "Europe/Tiraspol",
+        "Europe/Ulyanovsk",
+        "Europe/Uzhgorod",
+        "Europe/Vaduz",
+        "Europe/Vatican",
+        "Europe/Vienna",
+        "Europe/Vilnius",
+        "Europe/Volgograd",
+        "Europe/Warsaw",
+        "Europe/Zagreb",
+        "Europe/Zaporozhye",
+        "Europe/Zurich",
+        "GB",
+        "GBEire",
+        "GMT",
+        "GMTPlus0",
+        "GMTMinus0",
+        "GMT0",
+        "Greenwich",
+        "HST",
+        "Hongkong",
+        "Iceland",
+        "Indian/Antananarivo",
+        "Indian/Chagos",
+        "Indian/Christmas",
+        "Indian/Cocos",
+        "Indian/Comoro",
+        "Indian/Kerguelen",
+        "Indian/Mahe",
+        "Indian/Maldives",
+        "Indian/Mauritius",
+        "Indian/Mayotte",
+        "Indian/Reunion",
+        "Iran",
+        "Israel",
+        "Jamaica",
+        "Japan",
+        "Kwajalein",
+        "Libya",
+        "MET",
+        "MST",
+        "MST7MDT",
+        "Mexico/BajaNorte",
+        "Mexico/BajaSur",
+        "Mexico/General",
+        "NZ",
+        "NZCHAT",
+        "Navajo",
+        "PRC",
+        "PST8PDT",
+        "Pacific/Apia",
+        "Pacific/Auckland",
+        "Pacific/Bougainville",
+        "Pacific/Chatham",
+        "Pacific/Chuuk",
+        "Pacific/Easter",
+        "Pacific/Efate",
+        "Pacific/Enderbury",
+        "Pacific/Fakaofo",
+        "Pacific/Fiji",
+        "Pacific/Funafuti",
+        "Pacific/Galapagos",
+        "Pacific/Gambier",
+        "Pacific/Guadalcanal",
+        "Pacific/Guam",
+        "Pacific/Honolulu",
+        "Pacific/Johnston",
+        "Pacific/Kanton",
+        "Pacific/Kiritimati",
+        "Pacific/Kosrae",
+        "Pacific/Kwajalein",
+        "Pacific/Majuro",
+        "Pacific/Marquesas",
+        "Pacific/Midway",
+        "Pacific/Nauru",
+        "Pacific/Niue",
+        "Pacific/Norfolk",
+        "Pacific/Noumea",
+        "Pacific/Pago_Pago",
+        "Pacific/Palau",
+        "Pacific/Pitcairn",
+        "Pacific/Pohnpei",
+        "Pacific/Ponape",
+        "Pacific/Port_Moresby",
+        "Pacific/Rarotonga",
+        "Pacific/Saipan",
+        "Pacific/Samoa",
+        "Pacific/Tahiti",
+        "Pacific/Tarawa",
+        "Pacific/Tongatapu",
+        "Pacific/Truk",
+        "Pacific/Wake",
+        "Pacific/Wallis",
+        "Pacific/Yap",
+        "Poland",
+        "Portugal",
+        "ROC",
+        "ROK",
+        "Singapore",
+        "Turkey",
+        "UCT",
+        "US/Alaska",
+        "US/Aleutian",
+        "US/Arizona",
+        "US/Central",
+        "US/EastIndiana",
+        "US/Eastern",
+        "US/Hawaii",
+        "US/IndianaStarke",
+        "US/Michigan",
+        "US/Mountain",
+        "US/Pacific",
+        "US/Samoa",
+        "Universal",
+        "WSU",
+        "WET",
+        "Zulu",
     ];
 
-    const timezoneSelect = document.getElementById('timezoneSelect');
+    const timezoneSelect = document.getElementById("timezoneSelect");
     timezoneSelect.innerHTML = "";
 
-    timezones.forEach(zone => {
+    timezones.forEach((zone) => {
         let option = document.createElement("option");
         option.value = zone;
         option.textContent = zone;
@@ -70,111 +617,132 @@ function populateTimezoneSelect() {
 }
 
 function setTimezone() {
-    const timezone = document.getElementById('timezoneSelect').value;
+    const timezone = document.getElementById("timezoneSelect").value;
 
-    fetch('/set_timezone', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ timezone: timezone })
+    fetch("/set_timezone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timezone: timezone }),
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('message').innerText = "Timezone updated to: " + timezone;
+        .then((response) => response.text())
+        .then((data) => {
+            document.getElementById("message").innerText =
+                "Timezone updated to: " + timezone;
             fetchStatus();
         })
-        .catch(error => console.error('Error updating timezone:', error));
+        .catch((error) => console.error("Error updating timezone:", error));
 }
 
 function sendDigits() {
-    let digits = document.getElementById('digitsInput').value;
+    let digits = document.getElementById("digitsInput").value;
     if (digits) {
-        fetch('/set_digits?' + encodeURIComponent(digits), {
-            method: 'GET'
+        fetch("/set_digits?" + encodeURIComponent(digits), {
+            method: "GET",
         })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('message').innerText = "Digits sent: " + digits;
+            .then((response) => response.text())
+            .then((data) => {
+                document.getElementById("message").innerText =
+                    "Digits sent: " + digits;
             })
-            .catch(error => console.error('Error:', error));
+            .catch((error) => console.error("Error:", error));
     } else {
         alert("Please enter digits before sending.");
     }
 }
 
 function setBrightness() {
-    let brightness = document.getElementById('brightnessInput').value;
+    let brightness = document.getElementById("brightnessInput").value;
     if (brightness >= 0 && brightness <= 7) {
-        fetch('/set_brightness?' + brightness, {
-            method: 'GET'
+        fetch("/set_brightness?" + brightness, {
+            method: "GET",
         })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('message').innerText = "Brightness set to " + brightness;
+            .then((response) => response.text())
+            .then((data) => {
+                document.getElementById("message").innerText =
+                    "Brightness set to " + brightness;
             })
-            .catch(error => console.error('Error:', error));
+            .catch((error) => console.error("Error:", error));
     } else {
         alert("Brightness must be between 0 and 7.");
     }
 }
 
 function fetchStatus() {
-    fetch('/get_status', {
-        method: 'GET'
+    fetch("/get_status", {
+        method: "GET",
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('status').innerHTML = data;
+        .then((response) => response.text())
+        .then((data) => {
+            document.getElementById("status").innerHTML = data;
         })
-        .catch(error => console.error('Error fetching status:', error));
+        .catch((error) => console.error("Error fetching status:", error));
 }
 
 function syncTime() {
-    fetch('/sync_time', {
-        method: 'GET'
+    fetch("/sync_time", {
+        method: "GET",
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('message').innerText = "Time synced successfully!";
+        .then((response) => response.text())
+        .then((data) => {
+            document.getElementById("message").innerText =
+                "Time synced successfully!";
             fetchStatus();
         })
-        .catch(error => console.error('Error syncing time:', error));
+        .catch((error) => console.error("Error syncing time:", error));
 }
 
 function setTheme() {
-    const theme = document.getElementById('themeSelect').value;
+    const theme = document.getElementById("themeSelect").value;
 
-    fetch('/set_theme?' + encodeURIComponent(theme), {
-        method: 'GET'
+    fetch("/set_theme?" + encodeURIComponent(theme), {
+        method: "GET",
     })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('message').innerText = "Theme changed to: " + theme;
+        .then((response) => response.text())
+        .then((data) => {
+            document.getElementById("message").innerText =
+                "Theme changed to: " + theme;
 
-            if (theme === 'orange') {
-                document.body.style.backgroundColor = '#ff7f0e';
-                document.querySelector('.container').style.backgroundColor = '#fff5e6';
-                document.querySelectorAll('button').forEach(btn => btn.style.backgroundColor = '#ff7f0e');
-            } else if (theme === 'blue') {
-                document.body.style.backgroundColor = '#007bff';
-                document.querySelector('.container').style.backgroundColor = '#e6f2ff';
-                document.querySelectorAll('button').forEach(btn => btn.style.backgroundColor = '#007bff');
-            } else if (theme === 'green') {
-                document.body.style.backgroundColor = '#28a745';
-                document.querySelector('.container').style.backgroundColor = '#e6f9e0';
-                document.querySelectorAll('button').forEach(btn => btn.style.backgroundColor = '#28a745');
+            if (theme === "orange") {
+                document.body.style.backgroundColor = "#ff7f0e";
+                document.querySelector(".container").style.backgroundColor =
+                    "#fff5e6";
+                document
+                    .querySelectorAll("button")
+                    .forEach((btn) => (btn.style.backgroundColor = "#ff7f0e"));
+            } else if (theme === "blue") {
+                document.body.style.backgroundColor = "#007bff";
+                document.querySelector(".container").style.backgroundColor =
+                    "#e6f2ff";
+                document
+                    .querySelectorAll("button")
+                    .forEach((btn) => (btn.style.backgroundColor = "#007bff"));
+            } else if (theme === "green") {
+                document.body.style.backgroundColor = "#28a745";
+                document.querySelector(".container").style.backgroundColor =
+                    "#e6f9e0";
+                document
+                    .querySelectorAll("button")
+                    .forEach((btn) => (btn.style.backgroundColor = "#28a745"));
             }
         })
-        .catch(error => console.error('Error changing theme:', error));
+        .catch((error) => console.error("Error changing theme:", error));
 }
 
 function factoryReset() {
-    if (confirm("Are you sure you want to reset to factory settings? This action cannot be undone.")) {
-        fetch('/factory_reset', { method: 'GET' })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('message').innerText = "Factory reset initiated.";
+    if (
+        confirm(
+            "Are you sure you want to reset to factory settings? This action cannot be undone."
+        )
+    ) {
+        fetch("/factory_reset", { method: "GET" })
+            .then((response) => response.text())
+            .then((data) => {
+                document.getElementById("message").innerText =
+                    "Factory reset initiated.";
             })
-            .catch(error => console.error('Error initiating factory reset:', error));
+            .catch((error) =>
+                console.error("Error initiating factory reset:", error)
+            );
     }
 }
 
