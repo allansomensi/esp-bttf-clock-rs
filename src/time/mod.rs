@@ -1,5 +1,8 @@
 use chrono::{DateTime, Timelike, Utc};
-use std::{str::FromStr, time::SystemTime};
+use std::{
+    str::FromStr,
+    time::{Duration, SystemTime},
+};
 
 pub mod sntp;
 pub mod tz;
@@ -34,4 +37,20 @@ pub fn get_time() -> Vec<u8> {
     ];
 
     time_digits.into()
+}
+
+/// Calculates the time remaining until the next minute.
+///
+/// Returns a `Duration` representing the time to wait until the next exact
+/// minute.
+pub fn calculate_time_until_next_minute() -> Duration {
+    let timezone = tz::get_timezone();
+    let now_utc: DateTime<Utc> = SystemTime::now().into();
+    let now_local =
+        now_utc.with_timezone(&chrono_tz::Tz::from_str(&timezone).expect("Error reading Timezone"));
+
+    let current_seconds = now_local.second();
+    let seconds_to_wait = 60 - current_seconds;
+
+    Duration::new(seconds_to_wait as u64, 0)
 }
