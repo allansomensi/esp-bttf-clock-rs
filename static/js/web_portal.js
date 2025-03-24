@@ -3,7 +3,87 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('brightnessInput').value = '';
     document.getElementById('themeSelect').value = 'orange';
     document.getElementById('themeSelect').addEventListener('change', setTheme);
+
+    populateTimezoneSelect();
 });
+
+function populateTimezoneSelect() {
+    const timezones = [
+        "UTC", "Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers",
+        "Africa/Asmara", "Africa/Bamako", "Africa/Bangui", "Africa/Banjul", "Africa/Bissau",
+        "Africa/Blantyre", "Africa/Brazzaville", "Africa/Bujumbura", "Africa/Cairo",
+        "Africa/Casablanca", "Africa/Ceuta", "Africa/Conakry", "Africa/Dakar",
+        "Africa/Dar_es_Salaam", "Africa/Djibouti", "Africa/Douala", "Africa/El_Aaiun",
+        "Africa/Freetown", "Africa/Gaborone", "Africa/Harare", "Africa/Johannesburg",
+        "Africa/Juba", "Africa/Kampala", "Africa/Khartoum", "Africa/Kigali", "Africa/Kinshasa",
+        "Africa/Lagos", "Africa/Libreville", "Africa/Lome", "Africa/Luanda",
+        "Africa/Lusaka", "Africa/Malabo", "Africa/Maputo", "Africa/Maseru", "Africa/Mbabane",
+        "Africa/Mogadishu", "Africa/Monrovia", "Africa/Nairobi", "Africa/Ndjamena",
+        "Africa/Niamey", "Africa/Nouakchott", "Africa/Ouagadougou", "Africa/Porto-Novo",
+        "Africa/Sao_Tome", "Africa/Tripoli", "Africa/Tunis", "Africa/Windhoek",
+        "America/Adak", "America/Anchorage", "America/Araguaina", "America/Argentina/Buenos_Aires",
+        "America/Argentina/Catamarca", "America/Argentina/Cordoba", "America/Argentina/Jujuy",
+        "America/Argentina/La_Rioja", "America/Argentina/Mendoza", "America/Argentina/Rio_Gallegos",
+        "America/Argentina/Salta", "America/Argentina/San_Juan", "America/Argentina/San_Luis",
+        "America/Argentina/Tucuman", "America/Argentina/Ushuaia", "America/Asuncion",
+        "America/Atikokan", "America/Bahia", "America/Bahia_Banderas", "America/Barbados",
+        "America/Belem", "America/Belize", "America/Boa_Vista", "America/Bogota",
+        "America/Boise", "America/Cambridge_Bay", "America/Campo_Grande", "America/Cancun",
+        "America/Caracas", "America/Cayenne", "America/Chicago", "America/Chihuahua",
+        "America/Costa_Rica", "America/Cuiaba", "America/Curacao", "America/Danmarkshavn",
+        "America/Dawson", "America/Dawson_Creek", "America/Denver", "America/Detroit",
+        "America/Edmonton", "America/Eirunepe", "America/El_Salvador", "America/Fort_Nelson",
+        "America/Fortaleza", "America/Glace_Bay", "America/Godthab", "America/Goose_Bay",
+        "America/Grand_Turk", "America/Guatemala", "America/Guayaquil", "America/Guyana",
+        "America/Halifax", "America/Havana", "America/Hermosillo", "America/Indiana/Indianapolis",
+        "America/Indiana/Knox", "America/Indiana/Marengo", "America/Indiana/Petersburg",
+        "America/Indiana/Tell_City", "America/Indiana/Vevay", "America/Indiana/Vincennes",
+        "America/Indiana/Winamac", "America/Inuvik", "America/Iqaluit", "America/Jamaica",
+        "America/Juneau", "America/Kentucky/Louisville", "America/Kentucky/Monticello",
+        "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Maceio",
+        "America/Managua", "America/Manaus", "America/Martinique", "America/Matamoros",
+        "America/Mazatlan", "America/Menominee", "America/Merida", "America/Metlakatla",
+        "America/Mexico_City", "America/Miquelon", "America/Moncton", "America/Monterrey",
+        "America/Montevideo", "America/New_York", "America/Nipigon", "America/Nome",
+        "America/Noronha", "America/North_Dakota/Beulah", "America/North_Dakota/Center",
+        "America/North_Dakota/New_Salem", "America/Ojinaga", "America/Panama",
+        "America/Pangnirtung", "America/Paramaribo", "America/Phoenix", "America/Port-au-Prince",
+        "America/Porto_Velho", "America/Puerto_Rico", "America/Rainy_River",
+        "America/Recife", "America/Regina", "America/Resolute", "America/Rio_Branco",
+        "America/Santarem", "America/Santiago", "America/Santo_Domingo", "America/Sao_Paulo",
+        "America/Scoresbysund", "America/Sitka", "America/St_Johns", "America/Swift_Current",
+        "America/Tegucigalpa", "America/Thule", "America/Tijuana", "America/Toronto",
+        "America/Vancouver", "America/Whitehorse", "America/Winnipeg", "America/Yakutat",
+        "Asia/Shanghai", "Asia/Tokyo", "Europe/Lisbon", "Europe/London", "Europe/Madrid",
+        "Europe/Paris", "Europe/Rome", "Europe/Berlin"
+    ];
+
+    const timezoneSelect = document.getElementById('timezoneSelect');
+    timezoneSelect.innerHTML = "";
+
+    timezones.forEach(zone => {
+        let option = document.createElement("option");
+        option.value = zone;
+        option.textContent = zone;
+        timezoneSelect.appendChild(option);
+    });
+}
+
+function setTimezone() {
+    const timezone = document.getElementById('timezoneSelect').value;
+
+    fetch('/set_timezone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timezone: timezone })
+    })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('message').innerText = "Timezone updated to: " + timezone;
+            fetchStatus();
+        })
+        .catch(error => console.error('Error updating timezone:', error));
+}
 
 function sendDigits() {
     let digits = document.getElementById('digitsInput').value;

@@ -76,4 +76,6 @@ select {
     cursor: pointer;
     transition: all 0.3s ease;
     outline: none;
+    width: 130px;
+    margin: 10px;
 }

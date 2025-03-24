@@ -5,6 +5,7 @@ use esp_idf_svc::{
     nvs::{EspDefaultNvsPartition, EspNvs},
     sys::esp_restart,
 };
+use nvs::get_maybe_timezone;
 use server::dns_responder::DnsResponder;
 use std::{
     net::Ipv4Addr,
@@ -32,17 +33,28 @@ fn main() -> Result<(), error::AppError> {
 
     // Define the namespace for storing Wi-Fi settings in NVS
     let wifi_namespace = "wifi_ns";
+    // Define the namespace for storing Timezone settings in NVS
+    let tz_namespace = "tz_ns";
 
-    // Initialize NVS
-    let mut nvs = match EspNvs::new(nvs_default_partition.clone(), wifi_namespace, true) {
+    // Initialize Wi-Fi NVS
+    let mut wifi_nvs = match EspNvs::new(nvs_default_partition.clone(), wifi_namespace, true) {
         Ok(nvs) => {
             log::info!("Got namespace {:?} from default partition", wifi_namespace);
             nvs
         }
-        Err(e) => panic!("Could't get namespace {:?}", e),
+        Err(e) => panic!("Could't get wifi namespace {:?}", e),
     };
 
-    let credentials = nvs::get_maybe_wifi_credentials(&mut nvs).unwrap();
+    // Initialize Timezone NVS
+    let mut tz_nvs = match EspNvs::new(nvs_default_partition.clone(), tz_namespace, true) {
+        Ok(nvs) => {
+            log::info!("Got namespace {:?} from default partition", tz_namespace);
+            nvs
+        }
+        Err(e) => panic!("Could't get tz namespace {:?}", e),
+    };
+
+    let credentials = nvs::get_maybe_wifi_credentials(&mut wifi_nvs).unwrap();
 
     let is_ap_mode: bool;
 
@@ -85,7 +97,7 @@ fn main() -> Result<(), error::AppError> {
         )?;
 
         // Connect to the Wi-Fi network
-        wifi::station::connect_wifi_or_restart(&mut wifi_station, &mut nvs)?;
+        wifi::station::connect_wifi_or_restart(&mut wifi_station, &mut wifi_nvs)?;
 
         wifi_station
     };
@@ -114,7 +126,7 @@ fn main() -> Result<(), error::AppError> {
 
         // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
-            nvs::save_wifi_credentials(&mut nvs, credentials.ssid, credentials.password);
+            nvs::save_wifi_credentials(&mut wifi_nvs, credentials.ssid, credentials.password);
         }
 
         // Stop the AP Wi-Fi interface
@@ -158,6 +170,18 @@ fn main() -> Result<(), error::AppError> {
     time::sntp::init_sntp(&sntp).inspect_err(|e| {
         log::error!("Failed to initialize SNTP: {:#?}", e);
     })?;
+
+    // Read timezone from NVS
+    let timezone = get_maybe_timezone(&mut tz_nvs);
+
+    if let Some(tz) = timezone.unwrap_or(None) {
+        time::set_timezone(tz);
+    } else {
+        time::set_timezone(env!("DEFAULT_TIMEZONE").to_string());
+    }
+
+    let wifi_nvs = Arc::new(Mutex::new(wifi_nvs));
+    let tz_nvs = Arc::new(Mutex::new(tz_nvs));
 
     // Set the LED strip theme to default
     led_strip
@@ -228,9 +252,19 @@ fn main() -> Result<(), error::AppError> {
 
     web_portal_server
         .fn_handler(
+            "/set_timezone",
+            Method::Post,
+            server::web_portal::set_timezone(tz_nvs.clone()),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register set_timezone handler: {:#?}", e);
+        })?;
+
+    web_portal_server
+        .fn_handler(
             "/factory_reset",
             Method::Get,
-            server::web_portal::factory_reset(Arc::new(Mutex::new(nvs))),
+            server::web_portal::factory_reset(wifi_nvs, tz_nvs),
         )
         .inspect_err(|&e| {
             log::error!("Failed to register sync_time handler: {:#?}", e);

@@ -5,9 +5,10 @@ use crate::{
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
-    time::{self},
+    time::{self, TimezoneRequest},
     util,
 };
+use chrono_tz::Tz;
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
     http::server::{EspHttpConnection, Request},
@@ -16,7 +17,10 @@ use esp_idf_svc::{
     sntp::{EspSntp, SyncStatus},
     sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
-use std::sync::{Arc, Mutex};
+use std::{
+    str::FromStr,
+    sync::{Arc, Mutex},
+};
 
 static WEB_PORTAL_HTML: &str = include_str!("../../static/html/web_portal.html");
 static WEB_PORTAL_CSS: &str = include_str!("../../static/css/web_portal.css");
@@ -74,7 +78,7 @@ pub fn get_status(
     wifi_ssid: String,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let timezone = time::TIMEZONE;
+        let timezone = time::get_timezone();
         let time = time::get_time();
         let wifi_ssid = wifi_ssid.as_str();
 
@@ -86,6 +90,56 @@ pub fn get_status(
         );
 
         request.into_ok_response()?.write(status_html.as_bytes())?;
+
+        Ok::<(), AppError>(())
+    }
+}
+
+/// Sets the timezone based on the timezone data from the request body.
+///
+/// This function extracts the timezone information from the incoming request,
+/// validates the format, and updates the timezone accordingly. It also
+/// saves the timezone data in NVS and responds with a success message.
+///
+/// ## Arguments
+///
+/// * `tz_nvs` - A [Mutex] wrapping the [EspNvs] instance for storing the
+///   timezone data.
+///
+/// ## Returns
+///
+/// A closure that handles the HTTP request, validates the timezone, updates the
+/// system timezone, saves the data in NVS, and responds with a success message.
+pub fn set_timezone(
+    tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |mut request: Request<&mut EspHttpConnection<'_>>| {
+        let mut buf = [0u8; 128];
+        let len = request.read(&mut buf)?;
+        let buf = &buf[..len];
+
+        let timezone_data: TimezoneRequest = match serde_json::from_slice(buf) {
+            Ok(data) => data,
+            Err(_) => {
+                log::error!("Invalid JSON format");
+                request.into_status_response(400)?;
+                return Err(AppError::Server("Invalid request".to_string()));
+            }
+        };
+
+        if Tz::from_str(&timezone_data.timezone).is_err() {
+            log::error!("Invalid timezone: {}", timezone_data.timezone);
+            request.into_status_response(400)?;
+            return Err(AppError::Server("Invalid request".to_string()));
+        }
+
+        let mut tz_lock = tz_nvs.lock().unwrap();
+        nvs::save_timezone(&mut tz_lock, timezone_data.clone());
+        time::set_timezone(timezone_data.timezone);
+
+        request
+            .into_ok_response()?
+            .write("Timezone changed!".as_bytes())?;
 
         Ok::<(), AppError>(())
     }
@@ -111,10 +165,12 @@ pub fn get_status(
 /// - Calls `esp_restart()`, which immediately reboots the device. Any unsaved
 ///   data will be lost.
 pub fn factory_reset(
-    nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+    wifi_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+    tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |_: Request<&mut EspHttpConnection<'_>>| {
-        nvs::delete_wifi_credentials(&mut nvs.lock().unwrap());
+        nvs::delete_wifi_credentials(&mut wifi_nvs.lock().unwrap());
+        nvs::delete_timezone(&mut tz_nvs.lock().unwrap());
         log::info!("Factory reset initiated!");
         log::info!("Restarting...");
 
@@ -130,11 +186,11 @@ pub fn factory_reset(
 /// This function retrieves four digits from the request URI, updates the
 /// display accordingly, and responds with a success message.
 ///
-/// # Arguments
+/// ## Arguments
 ///
 /// * `display` - A [SharedTm1637] display instance.
 ///
-/// # Returns
+/// ## Returns
 ///
 /// A closure that handles the HTTP request, updates the display, and returns
 /// a success message.
