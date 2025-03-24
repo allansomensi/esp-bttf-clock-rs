@@ -45,6 +45,7 @@ pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<()
     }
 }
 
+/// Serves the CSS file for the web portal.
 pub fn web_portal_css() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         request
@@ -54,6 +55,7 @@ pub fn web_portal_css() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Resul
     }
 }
 
+/// Serves the JavaScript file for the web portal.
 pub fn web_portal_js() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         request
@@ -151,6 +153,7 @@ pub fn set_timezone(
 /// ## Behavior
 ///
 /// - Deletes the stored Wi-Fi credentials from NVS.
+/// - Deletes the stored Timezone settings from NVS.
 /// - Disconnects from the current Wi-Fi network.
 /// - Restarts the ESP32 device.
 ///
@@ -303,12 +306,6 @@ pub unsafe fn sync_time(
 /// - Sets the LED strip color based on the provided theme value.
 /// - Responds with `"Theme Updated!"` if successful.
 /// - Returns an error if the theme value is invalid.
-///
-/// ## Safety
-///
-/// - This function is marked as `unsafe` because it manipulates shared hardware
-///   resources (`led_strip`).
-/// - The caller must ensure safe access to the shared `led_strip` instance.
 ///
 /// ## Returns
 ///
