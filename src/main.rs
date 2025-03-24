@@ -5,7 +5,6 @@ use esp_idf_svc::{
     nvs::{EspDefaultNvsPartition, EspNvs},
     sys::esp_restart,
 };
-use nvs::get_maybe_timezone;
 use server::dns_responder::DnsResponder;
 use std::{
     net::Ipv4Addr,
@@ -54,7 +53,7 @@ fn main() -> Result<(), error::AppError> {
         Err(e) => panic!("Could't get tz namespace {:?}", e),
     };
 
-    let credentials = nvs::get_maybe_wifi_credentials(&mut wifi_nvs).unwrap();
+    let credentials = nvs::wifi::get_maybe_wifi_credentials(&mut wifi_nvs).unwrap();
 
     let is_ap_mode: bool;
 
@@ -126,7 +125,7 @@ fn main() -> Result<(), error::AppError> {
 
         // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
-            nvs::save_wifi_credentials(&mut wifi_nvs, credentials.ssid, credentials.password);
+            nvs::wifi::save_wifi_credentials(&mut wifi_nvs, credentials.ssid, credentials.password);
         }
 
         // Stop the AP Wi-Fi interface
@@ -172,7 +171,7 @@ fn main() -> Result<(), error::AppError> {
     })?;
 
     // Read timezone from NVS
-    let timezone = get_maybe_timezone(&mut tz_nvs);
+    let timezone = nvs::tz::get_maybe_timezone(&mut tz_nvs);
 
     if let Some(tz) = timezone.unwrap_or(None) {
         time::set_timezone(tz);

@@ -144,7 +144,7 @@ pub fn connect_wifi_or_restart(
         Ok(_) => log::info!("Wifi connected!"),
         Err(_) => {
             log::error!("Failed to connect to Wi-Fi! Restarting...");
-            nvs::delete_wifi_credentials(nvs);
+            nvs::wifi::delete_wifi_credentials(nvs);
             wifi.stop()?;
             unsafe {
                 esp_restart();

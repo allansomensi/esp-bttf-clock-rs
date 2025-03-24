@@ -134,7 +134,7 @@ pub fn set_timezone(
         }
 
         let mut tz_lock = tz_nvs.lock().unwrap();
-        nvs::save_timezone(&mut tz_lock, timezone_data.clone());
+        nvs::tz::save_timezone(&mut tz_lock, timezone_data.clone());
         time::set_timezone(timezone_data.timezone);
 
         request
@@ -169,8 +169,8 @@ pub fn factory_reset(
     tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |_: Request<&mut EspHttpConnection<'_>>| {
-        nvs::delete_wifi_credentials(&mut wifi_nvs.lock().unwrap());
-        nvs::delete_timezone(&mut tz_nvs.lock().unwrap());
+        nvs::wifi::delete_wifi_credentials(&mut wifi_nvs.lock().unwrap());
+        nvs::tz::delete_timezone(&mut tz_nvs.lock().unwrap());
         log::info!("Factory reset initiated!");
         log::info!("Restarting...");
 
