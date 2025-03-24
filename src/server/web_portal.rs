@@ -5,7 +5,7 @@ use crate::{
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
-    time::{self, TimezoneRequest},
+    time::{self, tz::TimezoneRequest},
     util,
 };
 use chrono_tz::Tz;
@@ -80,7 +80,7 @@ pub fn get_status(
     wifi_ssid: String,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
-        let timezone = time::get_timezone();
+        let timezone = time::tz::get_timezone();
         let time = time::get_time();
         let wifi_ssid = wifi_ssid.as_str();
 
@@ -137,7 +137,7 @@ pub fn set_timezone(
 
         let mut tz_lock = tz_nvs.lock().unwrap();
         nvs::tz::save_timezone(&mut tz_lock, timezone_data.clone());
-        time::set_timezone(timezone_data.timezone);
+        time::tz::set_timezone(timezone_data.timezone);
 
         request
             .into_ok_response()?

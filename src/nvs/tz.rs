@@ -1,4 +1,4 @@
-use crate::time::TimezoneRequest;
+use crate::time::tz::TimezoneRequest;
 use esp_idf_svc::nvs::{EspNvs, NvsDefault};
 
 /// Saves the provided timezone information to NVS storage.
