@@ -8,6 +8,7 @@
         "util",
         "view",
         "wifi",
+        "nvs"
     ],
     "material-icon-theme.folders.associations": {
         "wifi": "public",
