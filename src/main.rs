@@ -174,9 +174,9 @@ fn main() -> Result<(), error::AppError> {
     let timezone = nvs::tz::get_maybe_timezone(&mut tz_nvs);
 
     if let Some(tz) = timezone.unwrap_or(None) {
-        time::set_timezone(tz);
+        time::tz::set_timezone(tz);
     } else {
-        time::set_timezone(env!("DEFAULT_TIMEZONE").to_string());
+        time::tz::set_timezone(env!("DEFAULT_TIMEZONE").to_string());
     }
 
     let wifi_nvs = Arc::new(Mutex::new(wifi_nvs));
