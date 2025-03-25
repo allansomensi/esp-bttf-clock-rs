@@ -3,20 +3,13 @@
 A feature-rich **ESP32** clock and lamp built using **Rust** and the `esp-idf` framework. The device connects to Wi-Fi, synchronizes time via **SNTP**, and offers a web portal for configuration and customization.
 
 ## 🌟 Features
-- ⏰ **Time Synchronization:** Automatically syncs time via SNTP, with timezone support.
+- ⏰ **Time Synchronization:** Automatically syncs time via SNTP.
 - 🌐 **Web Portal:** User-friendly interface for configuring and controlling the clock.
 - 📡 **Captive Portal:** Simplifies Wi-Fi connection by automatically redirecting to the setup page.
 - 🔗 **mDNS Support:** Access the web portal easily using a hostname instead of an IP address.
-- 📄 **Dynamic Web Pages:** Real-time interaction with the device through the web interface.
 - 🎨 **Color Themes:** Multiple LED color themes for personalized aesthetics.
-- ⚙️ **Environment Variables:** Configuration settings managed through environment variables.
+- 🌍 **Dynamic Timezones:** Supports 500+ adjustable timezones.
 - 💾 **Persistent Storage:** Utilizes NVS (Non-Volatile Storage) for saving reusable settings.
-- 🛠️ **Robust Error Handling:** Ensures stability and reliability during operation.
-- 📌 **Modular components:**
-    - 🖥️ **Display Handler:** Manages time and status display.
-    - 🎇 **LED Strip Handler:** Controls LED colors and effects.
-    - 📶 **Wi-Fi Handler:** Manages network connectivity.
-    - 🔌 **HTTP Server:** Provides API endpoints for interaction.
 
 ## 🛠️ Installation & Usage
 
@@ -34,7 +27,7 @@ git clone https://github.com/allansomensi/esp-bttf-clock-rs.git
 cd esp-bttf-clock-rs
 ```
 
-#### 2. Configure environment variables in `/.cargo/config.toml`:
+#### 2. If you want, you can modify the environment variables in `.cargo/config.toml`:
 ```toml
 [env]
 AP_IP_ADDRESS = "192.168.71.1"
@@ -52,7 +45,7 @@ cargo run
 
 The ESP32 D1-mini does not support 5GHz Wi-Fi networks, as it only operates on the 2.4GHz band. Ensure that your router has a 2.4GHz network enabled and connect to it.
 
-## 🚦 Captive Portal Not Redirecting Automatically
+### 🚦 Captive Portal Not Redirecting Automatically
 
 If the login notification to connect to the network does not appear and you are not automatically redirected to the Wi-Fi setup page, manually enter the following URL in your browser:
 
