@@ -15,9 +15,9 @@ use esp_idf_svc::{
 /// Max payload length
 const MAX_LEN: usize = 128;
 
-static CAPTIVE_PORTAL_HTML: &str = include_str!("../../static/html/captive_portal.html");
-static CAPTIVE_PORTAL_CSS: &str = include_str!("../../static/css/captive_portal.css");
-static CAPTIVE_PORTAL_JS: &str = include_str!("../../static/js/captive_portal.js");
+static CAPTIVE_PORTAL_HTML: &str = include_str!("../../web/captive_portal/index.html");
+static CAPTIVE_PORTAL_CSS: &str = include_str!("../../web/captive_portal/style.css");
+static CAPTIVE_PORTAL_JS: &str = include_str!("../../web/captive_portal/main.js");
 
 /// Starts a captive portal HTTP server for configuring Wi-Fi credentials.
 ///
@@ -58,13 +58,13 @@ pub fn start_captive_portal() -> Result<(), AppError> {
     };
 
     server.fn_handler("/", Method::Get, config_page)?;
-    server.fn_handler::<AppError, _>("/css/captive_portal.css", Method::Get, |request| {
+    server.fn_handler::<AppError, _>("/style.css", Method::Get, |request| {
         request
             .into_response(200, None, &[("Content-Type", "text/css; charset=utf-8")])?
             .write_all(CAPTIVE_PORTAL_CSS.as_bytes())?;
         Ok(())
     })?;
-    server.fn_handler::<AppError, _>("/js/captive_portal.js", Method::Get, |request| {
+    server.fn_handler::<AppError, _>("/main.js", Method::Get, |request| {
         request
             .into_response(
                 200,

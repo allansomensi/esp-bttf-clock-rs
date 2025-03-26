@@ -202,7 +202,7 @@ fn main() -> Result<(), error::AppError> {
 
     web_portal_server
         .fn_handler(
-            "/css/web_portal.css",
+            "/assets/index.css",
             Method::Get,
             server::web_portal::web_portal_css(),
         )
@@ -212,7 +212,7 @@ fn main() -> Result<(), error::AppError> {
 
     web_portal_server
         .fn_handler(
-            "/js/web_portal.js",
+            "/assets/js/index.js",
             Method::Get,
             server::web_portal::web_portal_js(),
         )
