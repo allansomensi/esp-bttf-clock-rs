@@ -1,18 +1,20 @@
 {
     "conventionalCommits.scopes": [
-        "error",
         "display",
+        "error",
         "led",
+        "nvs",
         "server",
         "time",
         "util",
-        "view",
+        "web",
         "wifi",
-        "nvs"
     ],
     "material-icon-theme.folders.associations": {
         "wifi": "public",
         "nvs": "dump",
-        "time": "temp"
+        "time": "temp",
+        "captive_portal": "directive",
+        "web_portal": "content",
     }
 }
