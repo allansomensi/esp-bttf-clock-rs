@@ -22,9 +22,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-static WEB_PORTAL_HTML: &str = include_str!("../../static/html/web_portal.html");
-static WEB_PORTAL_CSS: &str = include_str!("../../static/css/web_portal.css");
-static WEB_PORTAL_JS: &str = include_str!("../../static/js/web_portal.js");
+static WEB_PORTAL_HTML: &str = include_str!("../../web/web_portal/dist/index.html");
+static WEB_PORTAL_CSS: &str = include_str!("../../web/web_portal/dist/assets/index.css");
+static WEB_PORTAL_JS: &str = include_str!("../../web/web_portal/dist/assets/js/index.js");
 
 /// Generates the web portal page response for the HTTP request.
 ///
