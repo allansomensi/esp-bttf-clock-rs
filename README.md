@@ -10,15 +10,17 @@ A feature-rich **ESP32** clock and lamp built using **Rust** and the `esp-idf` f
 - 🎨 **Color Themes:** Multiple LED color themes for personalized aesthetics.
 - 🌍 **Dynamic Timezones:** Supports 500+ adjustable timezones.
 - 💾 **Persistent Storage:** Utilizes NVS (Non-Volatile Storage) for saving reusable settings.
+- 🔒 **Secure by Design:** Built with Rust and TypeScript, ensuring memory safety and type safety.
 
-## 🛠️ Installation & Usage
+## 🛠️ Setup & Usage
 
 ### 📋 Prerequisites
 
 - **Rust** toolchain (recommended: nightly version).
-- **NodeJS** for the Web Portal.
-- **ESP32 D1-mini** development board.
+- **Node.js** for Captive and Web Portals.
+- **Just** for utility scripts (see [Install Just](https://github.com/casey/just#installation)).
 - **ESP-IDF** environment properly set up (see [ESP-RS setup](https://docs.esp-rs.org/book/installation/index.html)).
+- **ESP32 D1-mini** development board.
 
 ### 🔧 Development Setup
 
@@ -28,11 +30,9 @@ git clone https://github.com/allansomensi/esp-bttf-clock-rs.git
 cd esp-bttf-clock-rs
 ```
 
-#### 2. Build the Web Portal:
+#### 2. Build Captive and Web Portals:
 ```elixir
-cd web/web_portal
-npm install
-npm run build
+just build
 ```
 
 #### 3. If you want, you can modify the environment variables in `.cargo/config.toml`:
@@ -40,12 +40,12 @@ npm run build
 [env]
 AP_IP_ADDRESS = "192.168.71.1"
 AP_SSID = "My AP SSID"
-AP_PASSWORD = "My AP password"
+AP_PASSWORD = "My AP password" # Must be at least 8 characters long
 ```
 
 #### 4. Compile and flash the firmware:
 ```elixir
-cargo run
+just run  # or simply `just`
 ```
 
 ## 🛑 Common Issues & Troubleshooting
