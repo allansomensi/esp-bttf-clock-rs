@@ -6,9 +6,9 @@ run:
 
 [group: 'misc']
 build:
-    @echo "Installing dependencies on captive_portal..."
+    @echo "Installing dependencies for captive_portal..."
     @npm install --prefix web/captive_portal/
-    @echo "Installing dependencies on captive_portal..."
+    @echo "Installing dependencies for web_portal..."
     @npm install --prefix web/web_portal/
     @echo "Building captive_portal..."
     @npm run build --prefix web/captive_portal/
@@ -17,7 +17,7 @@ build:
 
 [group: 'misc']
 update:
-    @echo "Updating rust dependencies..."
+    @echo "Updating Rust dependencies..."
     @cargo update
     @echo "Updating captive_portal dependencies..."
     @npm update --prefix web/captive_portal/
