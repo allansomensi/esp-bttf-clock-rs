@@ -1,4 +1,3 @@
-/* Global Styles */
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f7f9fc;
@@ -11,7 +10,6 @@ body {
     color: #333;
 }
 
-/* Container */
 .container {
     background: #ffffff;
     padding: 30px;
@@ -22,7 +20,6 @@ body {
     text-align: center;
 }
 
-/* Title */
 h1 {
     font-size: 40px;
     color: #333;
@@ -35,7 +32,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Input and Button Styles */
 .row {
     margin: 15px 0;
 }
@@ -72,14 +68,12 @@ h2 {
     background-color: #0056b3;
 }
 
-/* Message */
 .message {
     margin-top: 15px;
     font-weight: bold;
     color: #28a745;
 }
 
-/* Responsive Styles */
 @media (max-width: 480px) {
     .container {
         padding: 20px;
