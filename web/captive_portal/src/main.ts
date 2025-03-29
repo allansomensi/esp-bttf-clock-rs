@@ -14,7 +14,6 @@ function createHTMLContent(): string {
     return `
         <div class="container">
             <h1>Back to the Future Clock</h1>
-            <p id="message" class="message"></p>
 
             <h2>Wi-Fi Settings</h2>
             <div class="row">
