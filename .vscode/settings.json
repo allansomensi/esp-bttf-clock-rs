@@ -4,6 +4,7 @@
         "error",
         "led",
         "nvs",
+        "script",
         "server",
         "time",
         "util",
