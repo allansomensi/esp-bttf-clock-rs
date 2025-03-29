@@ -1,95 +1,129 @@
 body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f7f9fc;
+    font-family: "Segoe UI", "Roboto", sans-serif;
+    background: linear-gradient(135deg, #1e1e2f 0%, #2a2a4a 100%);
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    color: #333;
+    min-height: 100vh;
+    color: #e0e0e0;
+    overflow-x: hidden;
 }
 
 .container {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.container:hover {
+    transform: translateY(-5px);
 }
 
 h1 {
-    font-size: 40px;
-    color: #333;
+    font-size: 42px;
+    color: #ffffff;
     margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
 h2 {
     font-size: 18px;
-    color: #555;
-    margin-bottom: 20px;
+    color: #b0b0d0;
+    margin-bottom: 25px;
+    font-weight: 300;
 }
 
 .row {
-    margin: 15px 0;
+    margin: 20px 0;
 }
 
 .row input {
     width: 100%;
-    padding: 12px 15px;
+    padding: 14px 18px;
     font-size: 16px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
     box-sizing: border-box;
-    margin-bottom: 10px;
-    transition: border-color 0.3s;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: all 0.3s ease;
 }
 
 .row input:focus {
-    border-color: #007bff;
+    border-color: #00ddeb;
+    box-shadow: 0 0 15px rgba(0, 221, 235, 0.5);
+    background: rgba(255, 255, 255, 0.15);
     outline: none;
+}
+
+.row input::placeholder {
+    color: #a0a0c0;
 }
 
 .row button {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     font-size: 16px;
-    color: white;
-    background-color: #007bff;
+    color: #ffffff;
+    background: linear-gradient(90deg, #007bff, #00ddeb);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
 }
 
+.row button:active,
 .row button:hover {
-    background-color: #0056b3;
+    background: linear-gradient(90deg, #0056b3, #00b7c3);
+    box-shadow: 0 6px 20px rgba(0, 183, 195, 0.6);
+    transform: scale(1.02);
 }
 
 .message {
-    margin-top: 15px;
-    font-weight: bold;
-    color: #28a745;
+    margin-top: 20px;
+    font-weight: 500;
+    color: #00ffcc;
+    text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 20px;
-        width: 90%;
+        padding: 25px;
+        width: 80%;
+        margin: 10px auto;
+        border-radius: 15px;
     }
 
     h1 {
-        font-size: 30px;
+        font-size: 32px;
+        letter-spacing: 1.5px;
     }
 
     h2 {
         font-size: 16px;
     }
 
-    .row input,
+    .row input {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
     .row button {
+        padding: 12px;
         font-size: 14px;
     }
 }
