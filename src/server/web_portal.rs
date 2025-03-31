@@ -1,12 +1,11 @@
 use crate::{
     error::AppError,
     module::{
-        display::{self, DisplayMessage, SharedTm1637},
+        display::{DisplayMessage, SharedSevenSegmentDisplay},
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
     time::{self, tz::TimezoneRequest},
-    util,
 };
 use chrono_tz::Tz;
 use esp_idf_svc::{
@@ -184,39 +183,6 @@ pub fn factory_reset(
     }
 }
 
-/// Updates the display digits based on the digits found in the request URL.
-///
-/// This function retrieves four digits from the request URI, updates the
-/// display accordingly, and responds with a success message.
-///
-/// ## Arguments
-///
-/// * `display` - A [SharedTm1637] display instance.
-///
-/// ## Returns
-///
-/// A closure that handles the HTTP request, updates the display, and returns
-/// a success message.
-pub unsafe fn set_digits(
-    display: SharedTm1637<impl OutputPin, impl IOPin>,
-) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
-    move |request: Request<&mut EspHttpConnection<'_>>| {
-        let digits = util::find_digits_in_url(request.uri());
-
-        let mut locked_display = display.lock().unwrap();
-        locked_display.clear()?;
-        locked_display.print_hex(0, &digits)?;
-
-        log::info!("Display digits updated manually");
-
-        request
-            .into_ok_response()?
-            .write("Digits inserted!".as_bytes())?;
-
-        Ok::<(), AppError>(())
-    }
-}
-
 /// Sets the brightness of the display based on the request URL.
 ///
 /// This function extracts the brightness value from the URL query parameters
@@ -231,9 +197,13 @@ pub unsafe fn set_digits(
 ///
 /// A closure that handles the HTTP request, updates the brightness, and returns
 /// a success message.
-pub unsafe fn set_brightness(
-    display: SharedTm1637<impl OutputPin, impl IOPin>,
-) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+pub unsafe fn set_brightness<'a, CLK, DIO>(
+    display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
+where
+    CLK: OutputPin + 'a,
+    DIO: IOPin + 'a,
+{
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let url = request.uri();
 
@@ -271,10 +241,14 @@ pub unsafe fn set_brightness(
 ///
 /// A closure that handles the HTTP request, synchronizes the time, updates the
 /// display, and returns a success message.
-pub unsafe fn sync_time(
-    display: SharedTm1637<impl OutputPin, impl IOPin>,
+pub unsafe fn sync_time<'a, CLK, DIO>(
+    display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
     sntp: EspSntp<'static>,
-) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
+where
+    CLK: OutputPin + 'a,
+    DIO: IOPin + 'a,
+{
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let sync_message = DisplayMessage::Sync.as_bytes();
 
@@ -282,10 +256,10 @@ pub unsafe fn sync_time(
 
         log::info!("Synchronizing with SNTP Server");
 
-        display::write(&display, sync_message)?;
+        display.lock().unwrap().write(sync_message)?;
 
         while sntp.get_sync_status() != SyncStatus::Completed {}
-        display::update_display_time(&display)?;
+        display.lock().unwrap().update_display_time()?;
 
         log::info!("Time sync completed!");
 

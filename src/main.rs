@@ -144,11 +144,14 @@ fn main() -> Result<(), error::AppError> {
     mdns.add_service(None, "_http", "_tcp", 80, &[])?;
 
     // Initialize the display
-    let display = module::display::get_display(peripherals.pins.gpio4, peripherals.pins.gpio5)
-        .inspect_err(|e| {
+    let display = Arc::new(Mutex::new(
+        module::display::SevenSegmentDisplay::new(peripherals.pins.gpio4, peripherals.pins.gpio5)
+            .inspect_err(|e| {
             log::error!("Failed to get display: {:#?}", e);
-        })?;
-    module::display::init_display(&display).inspect_err(|e| {
+        })?,
+    ));
+
+    display.lock().unwrap().init().inspect_err(|e| {
         log::error!("Failed to initialize display: {:#?}", e);
     })?;
     log::info!("Display initialized successfully!");
@@ -272,16 +275,6 @@ fn main() -> Result<(), error::AppError> {
     unsafe {
         web_portal_server
             .fn_handler_nonstatic(
-                "/set_digits",
-                Method::Get,
-                server::web_portal::set_digits(display.clone()),
-            )
-            .inspect_err(|&e| {
-                log::error!("Failed to register set_digits handler: {:#?}", e);
-            })?;
-
-        web_portal_server
-            .fn_handler_nonstatic(
                 "/set_brightness",
                 Method::Get,
                 server::web_portal::set_brightness(display.clone()),
@@ -308,7 +301,10 @@ fn main() -> Result<(), error::AppError> {
         // Wait until the next minute
         FreeRtos::delay_ms(wait_time.as_millis() as u32);
 
-        module::display::update_display_time(&display.clone())
+        display
+            .lock()
+            .unwrap()
+            .update_display_time()
             .inspect_err(|e| {
                 log::error!("Failed to update display time: {:#?}", e);
             })
