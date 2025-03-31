@@ -1,5 +1,5 @@
 import "./style.css";
-import { setDisplayBrightness, setDisplayDigits } from "./display";
+import { setDisplayBrightness } from "./display";
 import { populateTimezoneSelect, setTimezone, syncTime } from "./time";
 import { factoryReset } from "./sys";
 import { setTheme } from "./theme";
@@ -9,9 +9,6 @@ const app = document.querySelector<HTMLDivElement>("#app");
 
 if (app) {
     app.innerHTML = createHTMLContent();
-
-    const setDisplayDigitsBtn = document.getElementById("setDisplayDigitsBtn");
-    setDisplayDigitsBtn?.addEventListener("click", setDisplayDigits);
 
     const setDisplayBrightnessBtn = document.getElementById(
         "setDisplayBrightnessBtn"
@@ -27,9 +24,6 @@ if (app) {
     const factoryResetBtn = document.getElementById("factoryResetBtn");
     factoryResetBtn?.addEventListener("click", factoryReset);
 
-    const digitsInput = document.getElementById(
-        "digitsInput"
-    ) as HTMLInputElement;
     const brightnessInput = document.getElementById(
         "brightnessInput"
     ) as HTMLInputElement;
@@ -37,7 +31,6 @@ if (app) {
         "themeSelect"
     ) as HTMLSelectElement;
 
-    digitsInput.value = "";
     brightnessInput.value = "";
     themeSelect.value = "orange";
 
@@ -57,15 +50,6 @@ function createHTMLContent(): string {
 
             <!-- Display -->
             <h2>Display</h2>
-            <div class="row">
-                <input
-                    type="text"
-                    id="digitsInput"
-                    placeholder="Enter digits"
-                    autocomplete="off"
-                />
-                <button id="setDisplayDigitsBtn">Send Digits</button>
-            </div>
             <div class="row">
                 <input
                     type="number"
