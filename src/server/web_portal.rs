@@ -1,10 +1,8 @@
 use crate::{
     error::AppError,
-    module::{
-        display::SharedSevenSegmentDisplay,
-        led::{LedStripTheme, SharedLedStrip},
-    },
+    module::{display::SharedSevenSegmentDisplay, led::SharedLedStrip},
     nvs,
+    theme::{AppTheme, Theme},
     time::{self, tz::TimezoneRequest},
     util::messages::DisplayMessage,
 };
@@ -296,16 +294,16 @@ pub fn set_theme(
 
             match theme_value {
                 "orange" => {
-                    led_strip.lock().unwrap().set_theme(LedStripTheme::Orange)?;
+                    led_strip.lock().unwrap().apply_theme(&Theme::Orange)?;
                     log::info!("Theme changed to Orange");
                 }
-                "blue" => {
-                    led_strip.lock().unwrap().set_theme(LedStripTheme::Blue)?;
-                    log::info!("Theme changed to Blue");
-                }
                 "green" => {
-                    led_strip.lock().unwrap().set_theme(LedStripTheme::Green)?;
+                    led_strip.lock().unwrap().apply_theme(&Theme::Green)?;
                     log::info!("Theme changed to Green");
+                }
+                "blue" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::Blue)?;
+                    log::info!("Theme changed to Blue");
                 }
                 _ => {
                     log::warn!("Invalid theme: {theme_value}");

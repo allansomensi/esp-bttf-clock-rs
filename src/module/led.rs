@@ -1,36 +1,30 @@
-use crate::error::AppError;
+use crate::{
+    error::AppError,
+    theme::{AppTheme, Theme},
+};
 use esp_idf_svc::hal::{gpio::IOPin, peripheral::Peripheral, rmt::RmtChannel};
 use std::sync::{Arc, Mutex};
 use ws2812_esp32_rmt_driver::{Ws2812Esp32Rmt, RGB8};
 
-/// Enum representing predefined LED strip color themes.
-pub enum LedStripTheme {
-    Orange,
-    Blue,
-    Green,
-}
-
-impl Default for LedStripTheme {
-    fn default() -> Self {
-        Self::Orange
-    }
-}
-
-impl LedStripTheme {
-    /// Generates a vector of LED colors based on the selected theme.
+impl AppTheme for LedStrip<'_> {
+    /// Sets the LED strip to a predefined color theme.
     ///
     /// ## Arguments
-    /// - `num_leds`: The number of LEDs in the strip.
+    /// - `theme`: The [LedStripTheme] to apply to the LEDs.
     ///
     /// ## Returns
-    /// A vector containing `num_leds` elements of the selected theme color.
-    pub fn get_colors(&self, num_leds: u8) -> Vec<RGB8> {
-        let color = match self {
-            LedStripTheme::Orange => RGB8 { r: 255, g: 0, b: 0 },
-            LedStripTheme::Blue => RGB8 { r: 0, g: 0, b: 255 },
-            LedStripTheme::Green => RGB8 { r: 0, g: 255, b: 0 },
+    /// A `Result` indicating success or an `AppError` on failure.
+    fn apply_theme(&mut self, theme: &Theme) -> Result<(), AppError> {
+        let color = match theme {
+            Theme::Orange => RGB8 { r: 255, g: 0, b: 0 },
+            Theme::Green => RGB8 { r: 0, g: 255, b: 0 },
+            Theme::Blue => RGB8 { r: 0, g: 0, b: 255 },
         };
-        vec![color; num_leds as usize]
+
+        let data = vec![color; self.num_leds as usize];
+
+        self.ws2812.write_nocopy(data)?;
+        Ok(())
     }
 }
 
@@ -78,19 +72,6 @@ impl LedStrip<'_> {
     /// A `Result` indicating success or an [AppError] on failure.
     pub fn turn_off(&mut self) -> Result<(), AppError> {
         let data = vec![RGB8 { r: 0, g: 0, b: 0 }; self.num_leds as usize];
-        self.ws2812.write_nocopy(data)?;
-        Ok(())
-    }
-
-    /// Sets the LED strip to a predefined color theme.
-    ///
-    /// # Arguments
-    /// - `theme`: The [LedStripTheme] to apply to the LEDs.
-    ///
-    /// # Returns
-    /// A `Result` indicating success or an `AppError` on failure.
-    pub fn set_theme(&mut self, theme: LedStripTheme) -> Result<(), AppError> {
-        let data = theme.get_colors(self.num_leds);
         self.ws2812.write_nocopy(data)?;
         Ok(())
     }
