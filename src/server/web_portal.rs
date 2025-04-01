@@ -1,11 +1,12 @@
 use crate::{
     error::AppError,
     module::{
-        display::{DisplayMessage, SharedSevenSegmentDisplay},
+        display::SharedSevenSegmentDisplay,
         led::{LedStripTheme, SharedLedStrip},
     },
     nvs,
     time::{self, tz::TimezoneRequest},
+    util::messages::DisplayMessage,
 };
 use chrono_tz::Tz;
 use esp_idf_svc::{
