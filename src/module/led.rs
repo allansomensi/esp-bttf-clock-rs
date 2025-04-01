@@ -63,7 +63,8 @@ impl LedStrip<'_> {
         DIO: IOPin,
     {
         let ws2812 = Ws2812Esp32Rmt::new(channel, dio)?;
-        Ok(Arc::new(Mutex::new(LedStrip { ws2812, num_leds })))
+        let led_strip = LedStrip { ws2812, num_leds };
+        Ok(SharedLedStrip::new(led_strip.into()))
     }
 
     /// Turns off all LEDs in the strip.

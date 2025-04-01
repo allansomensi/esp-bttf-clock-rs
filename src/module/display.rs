@@ -10,18 +10,12 @@ use esp_idf_svc::hal::{
 use std::sync::{Arc, Mutex};
 use tm1637::TM1637;
 
-/// Type alias for the [TM1637] display using pin drivers and [Ets] as time
-/// control. This is an ´Arc<Mutex<>>´ to ensure thread safety and shared access
-/// to the display.
-pub type SharedTm1637<'a, CLK, DIO> =
-    Arc<Mutex<TM1637<'a, PinDriver<'a, CLK, Output>, PinDriver<'a, DIO, InputOutput>, Ets>>>;
-
 /// A thread-safe shared `SevenSegmentDisplay` using `Arc<Mutex<...>>`.
 pub type SharedSevenSegmentDisplay<'a, CLK, DIO> = Arc<Mutex<SevenSegmentDisplay<'a, CLK, DIO>>>;
 
 /// Centralizes the logic for controlling a seven-segment display.
 pub struct SevenSegmentDisplay<'a, CLK: OutputPin, DIO: IOPin> {
-    tm1637: SharedTm1637<'a, CLK, DIO>,
+    tm1637: TM1637<'a, PinDriver<'a, CLK, Output>, PinDriver<'a, DIO, InputOutput>, Ets>,
 }
 
 impl<CLK, DIO> SevenSegmentDisplay<'_, CLK, DIO>
@@ -52,18 +46,18 @@ where
     /// let display =
     ///     SevenSegmentDisplay::new(clk_pin, dio_pin).expect("Failed to initialize the display");
     /// ```
-    pub fn new(clk: CLK, dio: DIO) -> Result<Self, AppError> {
+    pub fn new<'a>(
+        clk: CLK,
+        dio: DIO,
+    ) -> Result<SharedSevenSegmentDisplay<'a, CLK, DIO>, AppError> {
         let clk = Box::new(PinDriver::output(clk)?);
         let dio = Box::new(PinDriver::input_output(dio)?);
         let delay = Box::new(Ets);
 
-        let display = Arc::new(Mutex::new(TM1637::new(
-            Box::leak(clk),
-            Box::leak(dio),
-            Box::leak(delay),
-        )));
+        let tm1637 = TM1637::new(Box::leak(clk), Box::leak(dio), Box::leak(delay));
+        let display = SevenSegmentDisplay { tm1637 };
 
-        Ok(Self { tm1637: display })
+        Ok(SharedSevenSegmentDisplay::new(display.into()))
     }
 
     /// Initializes the [SevenSegmentDisplay] by setting up the display and
@@ -85,8 +79,8 @@ where
     /// display.init().expect("Failed to initialize the display");
     /// ```
     pub fn init(&mut self) -> Result<(), AppError> {
-        self.tm1637.lock().unwrap().init()?;
-        self.tm1637.lock().unwrap().set_brightness(5)?;
+        self.tm1637.init()?;
+        self.tm1637.set_brightness(5)?;
 
         self.write(DisplayMessage::Init.as_bytes())?;
 
@@ -114,9 +108,8 @@ where
     ///     .expect("Failed to write to the display");
     /// ```
     pub fn write(&mut self, message: [u8; 4]) -> Result<(), AppError> {
-        let mut locked_display = self.tm1637.lock().unwrap();
-        locked_display.clear()?;
-        locked_display.print_raw(0, &message)?;
+        self.tm1637.clear()?;
+        self.tm1637.print_raw(0, &message)?;
 
         Ok(())
     }
@@ -139,7 +132,7 @@ where
     /// display.set_brightness(5).expect("Failed to set brightness");
     /// ```
     pub fn set_brightness(&mut self, level: u8) -> Result<(), AppError> {
-        self.tm1637.lock().unwrap().set_brightness(level)?;
+        self.tm1637.set_brightness(level)?;
 
         Ok(())
     }
