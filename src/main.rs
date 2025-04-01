@@ -146,12 +146,11 @@ fn main() -> Result<(), error::AppError> {
     mdns.add_service(None, "_http", "_tcp", 80, &[])?;
 
     // Initialize the display
-    let display = Arc::new(Mutex::new(
+    let display =
         module::display::SevenSegmentDisplay::new(peripherals.pins.gpio4, peripherals.pins.gpio5)
             .inspect_err(|e| {
             log::error!("Failed to get display: {:#?}", e);
-        })?,
-    ));
+        })?;
 
     display.lock().unwrap().init().inspect_err(|e| {
         log::error!("Failed to initialize display: {:#?}", e);
