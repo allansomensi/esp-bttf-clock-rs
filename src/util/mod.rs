@@ -1,3 +1,5 @@
+pub mod messages;
+
 /// A lookup table for displaying digits (0-9) on a 7-segment display.
 pub const DISPLAY_DIGIT: [u8; 10] = [
     0b00111111, // 0
