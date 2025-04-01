@@ -12,12 +12,14 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
+use theme::{AppTheme, Theme};
 use wifi::ap::AP_IP_ADDRESS;
 
 mod error;
 mod module;
 mod nvs;
 mod server;
+mod theme;
 mod time;
 mod util;
 mod wifi;
@@ -186,10 +188,7 @@ fn main() -> Result<(), error::AppError> {
     let tz_nvs = Arc::new(Mutex::new(tz_nvs));
 
     // Set the LED strip theme to default
-    led_strip
-        .lock()
-        .unwrap()
-        .set_theme(module::led::LedStripTheme::default())?;
+    led_strip.lock().unwrap().apply_theme(&Theme::default())?;
 
     // Start the Web portal HTTP server
     let mut web_portal_server = server::create_server().inspect_err(|e| {
