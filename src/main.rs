@@ -270,27 +270,25 @@ fn main() -> Result<(), error::AppError> {
             log::error!("Failed to register sync_time handler: {:#?}", e);
         })?;
 
-    unsafe {
-        web_portal_server
-            .fn_handler_nonstatic(
-                "/set_brightness",
-                Method::Get,
-                server::web_portal::set_brightness(display.clone()),
-            )
-            .inspect_err(|&e| {
-                log::error!("Failed to register set_brightness handler: {:#?}", e);
-            })?;
+    web_portal_server
+        .fn_handler(
+            "/set_brightness",
+            Method::Get,
+            server::web_portal::set_brightness(display.clone()),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register set_brightness handler: {:#?}", e);
+        })?;
 
-        web_portal_server
-            .fn_handler_nonstatic(
-                "/sync_time",
-                Method::Get,
-                server::web_portal::sync_time(display.clone(), sntp),
-            )
-            .inspect_err(|&e| {
-                log::error!("Failed to register sync_time handler: {:#?}", e);
-            })?;
-    }
+    web_portal_server
+        .fn_handler(
+            "/sync_time",
+            Method::Get,
+            server::web_portal::sync_time(display.clone(), sntp),
+        )
+        .inspect_err(|&e| {
+            log::error!("Failed to register sync_time handler: {:#?}", e);
+        })?;
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {
