@@ -160,11 +160,6 @@ pub fn set_timezone(
 /// - A closure that can be used as an HTTP request handler.
 /// - This function does not return control after execution, as the device
 ///   restarts.
-///
-/// ## Safety
-///
-/// - Calls `esp_restart()`, which immediately reboots the device. Any unsaved
-///   data will be lost.
 pub fn factory_reset(
     wifi_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
     tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
@@ -196,7 +191,7 @@ pub fn factory_reset(
 ///
 /// A closure that handles the HTTP request, updates the brightness, and returns
 /// a success message.
-pub unsafe fn set_brightness<'a, CLK, DIO>(
+pub fn set_brightness<'a, CLK, DIO>(
     display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
 where
@@ -240,7 +235,7 @@ where
 ///
 /// A closure that handles the HTTP request, synchronizes the time, updates the
 /// display, and returns a success message.
-pub unsafe fn sync_time<'a, CLK, DIO>(
+pub fn sync_time<'a, CLK, DIO>(
     display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
     sntp: EspSntp<'static>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
@@ -251,7 +246,9 @@ where
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let sync_message = DisplayMessage::Sync.as_bytes();
 
-        sntp_restart();
+        unsafe {
+            sntp_restart();
+        }
 
         log::info!("Synchronizing with SNTP Server");
 
