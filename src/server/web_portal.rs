@@ -1,7 +1,7 @@
 use crate::{
     error::AppError,
     module::{display::SharedSevenSegmentDisplay, led::SharedLedStrip},
-    nvs,
+    nvs::{self, AppStorage},
     theme::{AppTheme, Theme},
     time::{self, tz::TimezoneRequest},
     util::messages::DisplayMessage,
@@ -44,8 +44,7 @@ impl WebPortal {
         &mut self,
         display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
         led_strip: SharedLedStrip,
-        wifi_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
-        tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+        app_storage: AppStorage,
         sntp: EspSntp<'static>,
         wifi_ssid: String,
     ) -> Result<(), AppError> {
@@ -80,7 +79,11 @@ impl WebPortal {
             })?;
 
         self.server
-            .fn_handler("/set_timezone", Method::Post, set_timezone(tz_nvs.clone()))
+            .fn_handler(
+                "/set_timezone",
+                Method::Post,
+                set_timezone(app_storage.tz_nvs.clone()),
+            )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_timezone handler: {:#?}", e);
             })?;
@@ -89,7 +92,7 @@ impl WebPortal {
             .fn_handler(
                 "/factory_reset",
                 Method::Get,
-                factory_reset(wifi_nvs, tz_nvs),
+                factory_reset(app_storage.wifi_nvs, app_storage.tz_nvs),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {:#?}", e);

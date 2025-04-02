@@ -2,6 +2,8 @@ use crate::wifi::WifiCredentials;
 use esp_idf_svc::nvs::{EspNvs, NvsDefault};
 use postcard::{from_bytes, to_vec};
 
+pub const WIFI_NAMESPACE: &str = "wifi_ns";
+
 /// Saves Wi-Fi credentials to NVS storage.
 ///
 /// ## Arguments
