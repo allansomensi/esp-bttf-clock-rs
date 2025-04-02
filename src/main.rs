@@ -1,16 +1,12 @@
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, prelude::Peripherals},
-    nvs::{EspDefaultNvsPartition, EspNvs},
+    nvs::EspDefaultNvsPartition,
     sys::esp_restart,
 };
+use nvs::AppStorage;
 use server::{dns_responder::DnsResponder, web_portal::WebPortal};
-use std::{
-    net::Ipv4Addr,
-    str::FromStr,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::{net::Ipv4Addr, str::FromStr, time::Duration};
 use theme::{AppTheme, Theme};
 use wifi::ap::AP_IP_ADDRESS;
 
@@ -27,34 +23,14 @@ fn main() -> Result<(), error::AppError> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
 
-    let peripherals = Peripherals::take().expect("Failed to take peripherals");
-    let sysloop = EspSystemEventLoop::take().expect("Failed to take event loop");
+    let peripherals = Peripherals::take()?;
+    let sysloop = EspSystemEventLoop::take()?;
     let nvs_default_partition = EspDefaultNvsPartition::take()?;
 
-    // Define the namespace for storing Wi-Fi settings in NVS
-    let wifi_namespace = "wifi_ns";
-    // Define the namespace for storing Timezone settings in NVS
-    let tz_namespace = "tz_ns";
+    let app_storage = AppStorage::new(nvs_default_partition.clone())?;
 
-    // Initialize Wi-Fi NVS
-    let mut wifi_nvs = match EspNvs::new(nvs_default_partition.clone(), wifi_namespace, true) {
-        Ok(nvs) => {
-            log::info!("Got namespace {:?} from default partition", wifi_namespace);
-            nvs
-        }
-        Err(e) => panic!("Could't get wifi namespace {:?}", e),
-    };
-
-    // Initialize Timezone NVS
-    let mut tz_nvs = match EspNvs::new(nvs_default_partition.clone(), tz_namespace, true) {
-        Ok(nvs) => {
-            log::info!("Got namespace {:?} from default partition", tz_namespace);
-            nvs
-        }
-        Err(e) => panic!("Could't get tz namespace {:?}", e),
-    };
-
-    let credentials = nvs::wifi::get_maybe_wifi_credentials(&mut wifi_nvs).unwrap();
+    let credentials =
+        nvs::wifi::get_maybe_wifi_credentials(&mut app_storage.wifi_nvs.lock().unwrap()).unwrap();
 
     let is_ap_mode: bool;
 
@@ -97,7 +73,10 @@ fn main() -> Result<(), error::AppError> {
         )?;
 
         // Connect to the Wi-Fi network
-        wifi::station::connect_wifi_or_restart(&mut wifi_station, &mut wifi_nvs)?;
+        wifi::station::connect_wifi_or_restart(
+            &mut wifi_station,
+            &mut app_storage.wifi_nvs.lock().unwrap(),
+        )?;
 
         wifi_station
     };
@@ -126,7 +105,11 @@ fn main() -> Result<(), error::AppError> {
 
         // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
-            nvs::wifi::save_wifi_credentials(&mut wifi_nvs, credentials.ssid, credentials.password);
+            nvs::wifi::save_wifi_credentials(
+                &mut app_storage.wifi_nvs.lock().unwrap(),
+                credentials.ssid,
+                credentials.password,
+            );
         }
 
         // Stop the AP Wi-Fi interface
@@ -174,16 +157,13 @@ fn main() -> Result<(), error::AppError> {
     })?;
 
     // Read timezone from NVS
-    let timezone = nvs::tz::get_maybe_timezone(&mut tz_nvs);
+    let timezone = nvs::tz::get_maybe_timezone(&mut app_storage.tz_nvs.lock().unwrap());
 
     if let Some(tz) = timezone.unwrap_or(None) {
         time::tz::set_timezone(tz);
     } else {
         time::tz::set_timezone(env!("DEFAULT_TIMEZONE").to_string());
     }
-
-    let wifi_nvs = Arc::new(Mutex::new(wifi_nvs));
-    let tz_nvs = Arc::new(Mutex::new(tz_nvs));
 
     // Set the LED strip theme to default
     led_strip.lock().unwrap().apply_theme(&Theme::default())?;
@@ -201,14 +181,7 @@ fn main() -> Result<(), error::AppError> {
         .to_string();
 
     // Define HTTP routes
-    web_portal.create_routes(
-        display.clone(),
-        led_strip,
-        wifi_nvs,
-        tz_nvs,
-        sntp,
-        wifi_ssid,
-    )?;
+    web_portal.create_routes(display.clone(), led_strip, app_storage, sntp, wifi_ssid)?;
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {

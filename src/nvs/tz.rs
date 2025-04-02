@@ -1,6 +1,8 @@
 use crate::time::tz::TimezoneRequest;
 use esp_idf_svc::nvs::{EspNvs, NvsDefault};
 
+pub const TZ_NAMESPACE: &str = "tz_ns";
+
 /// Saves the provided timezone information to NVS storage.
 ///
 /// ## Arguments
