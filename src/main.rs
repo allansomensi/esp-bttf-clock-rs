@@ -137,16 +137,14 @@ fn main() -> Result<(), error::AppError> {
     display.lock().unwrap().init().inspect_err(|e| {
         log::error!("Failed to initialize display: {:#?}", e);
     })?;
-    log::info!("Display initialized successfully!");
 
     // Initialize the led strip
-    let led_strip =
+    let mut led_strip =
         module::led::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio13, 7)
             .inspect_err(|e| {
                 log::error!("Failed to get led strip: {:#?}", e);
             })?;
-    led_strip.lock().unwrap().turn_off()?;
-    log::info!("Led strip initialized successfully!");
+    led_strip.init()?;
 
     // Initialize SNTP
     let sntp = time::sntp::get_sntp().inspect_err(|e| {
@@ -166,7 +164,7 @@ fn main() -> Result<(), error::AppError> {
     }
 
     // Set the LED strip theme to default
-    led_strip.lock().unwrap().apply_theme(&Theme::default())?;
+    led_strip.apply_theme(&Theme::default())?;
 
     // Start the Web portal HTTP server
     let mut web_portal = WebPortal::new()?;

@@ -1,6 +1,9 @@
 use crate::{
     error::AppError,
-    module::{display::SharedSevenSegmentDisplay, led::SharedLedStrip},
+    module::{
+        display::SharedSevenSegmentDisplay,
+        led::{LedStrip, SharedLedStrip},
+    },
     nvs::{self, AppStorage},
     theme::{AppTheme, Theme},
     time::{self, tz::TimezoneRequest},
@@ -43,7 +46,7 @@ impl WebPortal {
     pub fn create_routes<CLK: OutputPin, DIO: IOPin>(
         &mut self,
         display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
-        led_strip: SharedLedStrip,
+        led_strip: LedStrip<'static>,
         app_storage: AppStorage,
         sntp: EspSntp<'static>,
         wifi_ssid: String,
@@ -73,7 +76,11 @@ impl WebPortal {
             })?;
 
         self.server
-            .fn_handler("/set_theme", Method::Get, set_theme(led_strip))
+            .fn_handler(
+                "/set_theme",
+                Method::Get,
+                set_theme(Arc::new(Mutex::new(led_strip))),
+            )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_theme handler: {:#?}", e);
             })?;

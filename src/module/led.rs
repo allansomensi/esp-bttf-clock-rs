@@ -6,6 +6,12 @@ use esp_idf_svc::hal::{gpio::IOPin, peripheral::Peripheral, rmt::RmtChannel};
 use std::sync::{Arc, Mutex};
 use ws2812_esp32_rmt_driver::{Ws2812Esp32Rmt, RGB8};
 
+/// Type alias for a shared [LedStrip] instance.
+///
+/// This is an `Arc<Mutex<>>` to ensure thread safety and shared access to the
+/// LED strip.
+pub type SharedLedStrip = Arc<Mutex<LedStrip<'static>>>;
+
 impl AppTheme for LedStrip<'_> {
     /// Sets the LED strip to a predefined color theme.
     ///
@@ -23,20 +29,14 @@ impl AppTheme for LedStrip<'_> {
 
         let data = vec![color; self.num_leds as usize];
 
-        self.ws2812.write_nocopy(data)?;
+        self.ws2812.lock().unwrap().write_nocopy(data)?;
         Ok(())
     }
 }
 
-/// Type alias for a shared [LedStrip] instance.
-///
-/// This is an `Arc<Mutex<>>` to ensure thread safety and shared access to the
-/// LED strip.
-pub type SharedLedStrip = Arc<Mutex<LedStrip<'static>>>;
-
 /// Struct representing a WS2812 LED strip.
 pub struct LedStrip<'a> {
-    ws2812: Ws2812Esp32Rmt<'a>,
+    ws2812: Arc<Mutex<Ws2812Esp32Rmt<'a>>>,
     pub num_leds: u8,
 }
 
@@ -57,14 +57,24 @@ impl LedStrip<'_> {
     /// ```
     /// let led_strip = LedStrip::new(channel, dio, 7).expect("Failed to create LED strip");
     /// ```
-    pub fn new<C, DIO>(channel: C, dio: DIO, num_leds: u8) -> Result<SharedLedStrip, AppError>
+    pub fn new<C, DIO>(channel: C, dio: DIO, num_leds: u8) -> Result<Self, AppError>
     where
         C: Peripheral<P = C> + RmtChannel + 'static,
         DIO: IOPin,
     {
         let ws2812 = Ws2812Esp32Rmt::new(channel, dio)?;
-        let led_strip = LedStrip { ws2812, num_leds };
-        Ok(SharedLedStrip::new(led_strip.into()))
+        let led_strip = LedStrip {
+            ws2812: Arc::new(Mutex::new(ws2812)),
+            num_leds,
+        };
+        Ok(led_strip)
+    }
+
+    pub fn init(&mut self) -> Result<(), AppError> {
+        self.turn_off()?;
+        log::info!("Led strip initialized successfully!");
+
+        Ok(())
     }
 
     /// Turns off all LEDs in the strip.
@@ -73,7 +83,7 @@ impl LedStrip<'_> {
     /// A `Result` indicating success or an [AppError] on failure.
     pub fn turn_off(&mut self) -> Result<(), AppError> {
         let data = vec![RGB8 { r: 0, g: 0, b: 0 }; self.num_leds as usize];
-        self.ws2812.write_nocopy(data)?;
+        self.ws2812.lock().unwrap().write_nocopy(data)?;
         Ok(())
     }
 }
