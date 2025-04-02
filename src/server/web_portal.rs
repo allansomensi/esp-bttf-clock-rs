@@ -9,7 +9,10 @@ use crate::{
 use chrono_tz::Tz;
 use esp_idf_svc::{
     hal::gpio::{IOPin, OutputPin},
-    http::server::{EspHttpConnection, Request},
+    http::{
+        server::{EspHttpConnection, EspHttpServer, Request},
+        Method,
+    },
     io::Write,
     nvs::{EspNvs, NvsDefault},
     sntp::{EspSntp, SyncStatus},
@@ -23,6 +26,94 @@ use std::{
 static WEB_PORTAL_HTML: &str = include_str!("../../web/web_portal/dist/index.html");
 static WEB_PORTAL_CSS: &str = include_str!("../../web/web_portal/dist/assets/index.css");
 static WEB_PORTAL_JS: &str = include_str!("../../web/web_portal/dist/assets/js/index.js");
+
+pub struct WebPortal {
+    server: EspHttpServer<'static>,
+}
+
+impl WebPortal {
+    pub fn new() -> Result<Self, AppError> {
+        Ok(Self {
+            server: super::create_server().inspect_err(|e| {
+                log::error!("Failed to start HTTP server: {:#?}", e);
+            })?,
+        })
+    }
+
+    pub fn create_routes<CLK: OutputPin, DIO: IOPin>(
+        &mut self,
+        display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
+        led_strip: SharedLedStrip,
+        wifi_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+        tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+        sntp: EspSntp<'static>,
+        wifi_ssid: String,
+    ) -> Result<(), AppError> {
+        self.server
+            .fn_handler("/", Method::Get, web_portal())
+            .inspect_err(|&e| {
+                log::error!("Failed to register web portal handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/assets/index.css", Method::Get, web_portal_css())
+            .inspect_err(|&e| {
+                log::error!("Failed to serve CSS: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/assets/js/index.js", Method::Get, web_portal_js())
+            .inspect_err(|&e| {
+                log::error!("Failed to serve JS: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/get_status", Method::Get, get_status(wifi_ssid))
+            .inspect_err(|&e| {
+                log::error!("Failed to register get_status handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/set_theme", Method::Get, set_theme(led_strip))
+            .inspect_err(|&e| {
+                log::error!("Failed to register set_theme handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/set_timezone", Method::Post, set_timezone(tz_nvs.clone()))
+            .inspect_err(|&e| {
+                log::error!("Failed to register set_timezone handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler(
+                "/factory_reset",
+                Method::Get,
+                factory_reset(wifi_nvs, tz_nvs),
+            )
+            .inspect_err(|&e| {
+                log::error!("Failed to register sync_time handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler(
+                "/set_brightness",
+                Method::Get,
+                set_brightness(display.clone()),
+            )
+            .inspect_err(|&e| {
+                log::error!("Failed to register set_brightness handler: {:#?}", e);
+            })?;
+
+        self.server
+            .fn_handler("/sync_time", Method::Get, sync_time(display.clone(), sntp))
+            .inspect_err(|&e| {
+                log::error!("Failed to register sync_time handler: {:#?}", e);
+            })?;
+
+        Ok(())
+    }
+}
 
 /// Generates the web portal page response for the HTTP request.
 ///
