@@ -1,11 +1,10 @@
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, prelude::Peripherals},
-    http::Method,
     nvs::{EspDefaultNvsPartition, EspNvs},
     sys::esp_restart,
 };
-use server::dns_responder::DnsResponder;
+use server::{dns_responder::DnsResponder, web_portal::WebPortal};
 use std::{
     net::Ipv4Addr,
     str::FromStr,
@@ -190,36 +189,7 @@ fn main() -> Result<(), error::AppError> {
     led_strip.lock().unwrap().apply_theme(&Theme::default())?;
 
     // Start the Web portal HTTP server
-    let mut web_portal_server = server::create_server().inspect_err(|e| {
-        log::error!("Failed to start HTTP server: {:#?}", e);
-    })?;
-
-    // Define HTTP routes
-    web_portal_server
-        .fn_handler("/", Method::Get, server::web_portal::web_portal())
-        .inspect_err(|&e| {
-            log::error!("Failed to register web portal handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/assets/index.css",
-            Method::Get,
-            server::web_portal::web_portal_css(),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to serve CSS: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/assets/js/index.js",
-            Method::Get,
-            server::web_portal::web_portal_js(),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to serve JS: {:#?}", e);
-        })?;
+    let mut web_portal = WebPortal::new()?;
 
     let wifi_ssid = wifi
         .wifi()
@@ -230,65 +200,15 @@ fn main() -> Result<(), error::AppError> {
         .ssid
         .to_string();
 
-    web_portal_server
-        .fn_handler(
-            "/get_status",
-            Method::Get,
-            server::web_portal::get_status(wifi_ssid),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register get_status handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/set_theme",
-            Method::Get,
-            server::web_portal::set_theme(led_strip),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register set_theme handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/set_timezone",
-            Method::Post,
-            server::web_portal::set_timezone(tz_nvs.clone()),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register set_timezone handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/factory_reset",
-            Method::Get,
-            server::web_portal::factory_reset(wifi_nvs, tz_nvs),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register sync_time handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/set_brightness",
-            Method::Get,
-            server::web_portal::set_brightness(display.clone()),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register set_brightness handler: {:#?}", e);
-        })?;
-
-    web_portal_server
-        .fn_handler(
-            "/sync_time",
-            Method::Get,
-            server::web_portal::sync_time(display.clone(), sntp),
-        )
-        .inspect_err(|&e| {
-            log::error!("Failed to register sync_time handler: {:#?}", e);
-        })?;
+    // Define HTTP routes
+    web_portal.create_routes(
+        display.clone(),
+        led_strip,
+        wifi_nvs,
+        tz_nvs,
+        sntp,
+        wifi_ssid,
+    )?;
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {
