@@ -10,6 +10,8 @@ use esp_idf_svc::hal::{
 use std::sync::{Arc, Mutex};
 use tm1637::TM1637;
 
+use super::led::SharedAmPmIndicator;
+
 /// A thread-safe shared `SevenSegmentDisplay` using `Arc<Mutex<...>>`.
 pub type SharedSevenSegmentDisplay<'a, CLK, DIO> = Arc<Mutex<SevenSegmentDisplay<'a, CLK, DIO>>>;
 
@@ -80,7 +82,7 @@ where
     /// ```
     pub fn init(&mut self) -> Result<(), AppError> {
         self.tm1637.init()?;
-        self.tm1637.set_brightness(5)?;
+        self.tm1637.set_brightness(3)?;
 
         self.write(DisplayMessage::Init.as_bytes())?;
 
@@ -155,8 +157,11 @@ where
     ///     .update_display_time()
     ///     .expect("Failed to update time on display");
     /// ```
-    pub fn update_display_time(&mut self) -> Result<(), AppError> {
-        let time = time::get_time();
+    pub fn update_display_hour<AM: OutputPin, PM: OutputPin>(
+        &mut self,
+        am_pm_indicator: SharedAmPmIndicator<AM, PM>,
+    ) -> Result<(), AppError> {
+        let time = time::get_hour_min();
 
         let digits = [
             DISPLAY_DIGIT[time[0] as usize],
@@ -166,6 +171,29 @@ where
         ];
 
         self.write([digits[0], digits[1], digits[2], digits[3]])?;
+
+        let hour = time[0] * 10 + time[1];
+
+        if hour < 12 {
+            am_pm_indicator.lock().unwrap().set_am()?;
+        } else {
+            am_pm_indicator.lock().unwrap().set_pm()?;
+        }
+
+        Ok(())
+    }
+
+    pub fn update_display_year(&mut self) -> Result<(), AppError> {
+        let year = time::get_year();
+
+        let digits = [
+            DISPLAY_DIGIT[year[0] as usize],
+            DISPLAY_DIGIT[year[1] as usize],
+            DISPLAY_DIGIT[year[2] as usize],
+            DISPLAY_DIGIT[year[3] as usize],
+        ];
+
+        self.write(digits)?;
 
         Ok(())
     }

@@ -1,6 +1,6 @@
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
-    hal::{delay::FreeRtos, prelude::Peripherals},
+    hal::{delay::FreeRtos, peripheral::Peripheral, prelude::Peripherals},
     nvs::EspDefaultNvsPartition,
     sys::esp_restart,
 };
@@ -23,7 +23,7 @@ fn main() -> Result<(), error::AppError> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
 
-    let peripherals = Peripherals::take()?;
+    let mut peripherals = Peripherals::take()?;
     let sysloop = EspSystemEventLoop::take()?;
     let nvs_default_partition = EspDefaultNvsPartition::take()?;
 
@@ -127,20 +127,39 @@ fn main() -> Result<(), error::AppError> {
     mdns.set_instance_name("espclock")?;
     mdns.add_service(None, "_http", "_tcp", 80, &[])?;
 
-    // Initialize the display
-    let display =
-        module::display::SevenSegmentDisplay::new(peripherals.pins.gpio4, peripherals.pins.gpio5)
-            .inspect_err(|e| {
-            log::error!("Failed to get display: {:#?}", e);
-        })?;
+    let am_pm_indicator =
+        module::led::AmPmIndicator::new(peripherals.pins.gpio32, peripherals.pins.gpio33)?;
+    am_pm_indicator.lock().unwrap().clear()?;
 
-    display.lock().unwrap().init().inspect_err(|e| {
-        log::error!("Failed to initialize display: {:#?}", e);
+    // Initialize the hour/min display
+    let hour_display = module::display::SevenSegmentDisplay::new(
+        unsafe { peripherals.pins.gpio16.clone_unchecked() },
+        peripherals.pins.gpio18,
+    )
+    .inspect_err(|e| {
+        log::error!("Failed to get hour display: {:#?}", e);
+    })?;
+
+    hour_display.lock().unwrap().init().inspect_err(|e| {
+        log::error!("Failed to initialize hour display: {:#?}", e);
+    })?;
+
+    // Initialize the year display
+    let year_display = module::display::SevenSegmentDisplay::new(
+        unsafe { peripherals.pins.gpio16.clone_unchecked() },
+        peripherals.pins.gpio17,
+    )
+    .inspect_err(|e| {
+        log::error!("Failed to get year display: {:#?}", e);
+    })?;
+
+    year_display.lock().unwrap().init().inspect_err(|e| {
+        log::error!("Failed to initialize year display: {:#?}", e);
     })?;
 
     // Initialize the led strip
     let mut led_strip =
-        module::led::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio13, 7)
+        module::led_strip::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio5, 18)
             .inspect_err(|e| {
                 log::error!("Failed to get led strip: {:#?}", e);
             })?;
@@ -179,7 +198,14 @@ fn main() -> Result<(), error::AppError> {
         .to_string();
 
     // Define HTTP routes
-    web_portal.create_routes(display.clone(), led_strip, app_storage, sntp, wifi_ssid)?;
+    web_portal.create_routes(
+        hour_display.clone(),
+        am_pm_indicator.clone(),
+        led_strip,
+        app_storage,
+        sntp,
+        wifi_ssid,
+    )?;
 
     // Create a thread for updating the time in display
     std::thread::spawn(move || loop {
@@ -188,12 +214,21 @@ fn main() -> Result<(), error::AppError> {
         // Wait until the next minute
         FreeRtos::delay_ms(wait_time.as_millis() as u32);
 
-        display
+        hour_display
             .lock()
             .unwrap()
-            .update_display_time()
+            .update_display_hour(am_pm_indicator.clone())
             .inspect_err(|e| {
-                log::error!("Failed to update display time: {:#?}", e);
+                log::error!("Failed to update hour/min display: {:#?}", e);
+            })
+            .unwrap();
+
+        year_display
+            .lock()
+            .unwrap()
+            .update_display_year()
+            .inspect_err(|e| {
+                log::error!("Failed to update year display: {:#?}", e);
             })
             .unwrap();
     });

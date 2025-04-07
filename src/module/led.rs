@@ -1,89 +1,53 @@
-use crate::{
-    error::AppError,
-    theme::{AppTheme, Theme},
+use crate::error::AppError;
+use esp_idf_svc::hal::{
+    gpio::{Output, OutputPin, PinDriver},
+    peripheral::Peripheral,
 };
-use esp_idf_svc::hal::{gpio::IOPin, peripheral::Peripheral, rmt::RmtChannel};
 use std::sync::{Arc, Mutex};
-use ws2812_esp32_rmt_driver::{Ws2812Esp32Rmt, RGB8};
 
-/// Type alias for a shared [LedStrip] instance.
-///
-/// This is an `Arc<Mutex<>>` to ensure thread safety and shared access to the
-/// LED strip.
-pub type SharedLedStrip = Arc<Mutex<LedStrip<'static>>>;
+pub type SharedAmPmIndicator<'a, AM, PM> = Arc<Mutex<AmPmIndicator<'a, AM, PM>>>;
 
-impl AppTheme for LedStrip<'_> {
-    /// Sets the LED strip to a predefined color theme.
-    ///
-    /// ## Arguments
-    /// - `theme`: The [LedStripTheme] to apply to the LEDs.
-    ///
-    /// ## Returns
-    /// A `Result` indicating success or an `AppError` on failure.
-    fn apply_theme(&mut self, theme: &Theme) -> Result<(), AppError> {
-        let color = match theme {
-            Theme::Orange => RGB8 { r: 255, g: 0, b: 0 },
-            Theme::Green => RGB8 { r: 0, g: 255, b: 0 },
-            Theme::Blue => RGB8 { r: 0, g: 0, b: 255 },
-        };
-
-        let data = vec![color; self.num_leds as usize];
-
-        self.ws2812.lock().unwrap().write_nocopy(data)?;
-        Ok(())
-    }
+pub struct AmPmIndicator<'a, AM, PM>
+where
+    AM: OutputPin,
+    PM: OutputPin,
+{
+    am: Arc<Mutex<PinDriver<'a, AM, Output>>>,
+    pm: Arc<Mutex<PinDriver<'a, PM, Output>>>,
 }
 
-/// Struct representing a WS2812 LED strip.
-pub struct LedStrip<'a> {
-    ws2812: Arc<Mutex<Ws2812Esp32Rmt<'a>>>,
-    pub num_leds: u8,
-}
+impl<'a, AM, PM> AmPmIndicator<'a, AM, PM>
+where
+    AM: Peripheral<P = AM> + OutputPin + 'a,
+    PM: Peripheral<P = PM> + OutputPin + 'a,
+{
+    pub fn new(am_pin: AM, pm_pin: PM) -> Result<SharedAmPmIndicator<'a, AM, PM>, AppError> {
+        let am = Arc::new(Mutex::new(PinDriver::output(am_pin)?));
+        let pm = Arc::new(Mutex::new(PinDriver::output(pm_pin)?));
 
-impl LedStrip<'_> {
-    /// Creates a new [LedStrip] instance.
-    ///
-    /// ## Arguments
-    /// - `channel`: The RMT channel to use for LED communication (implements
-    ///   [Peripheral] + [RmtChannel]).
-    /// - `dio`: The data pin for the LED strip (implements [IOPin]).
-    /// - `num_leds`: The number of LEDs in the strip.
-    ///
-    /// ## Returns
-    /// A `Result` containing a shared [LedStrip] instance on success, or an
-    /// [AppError] on failure.
-    ///
-    /// ## Example
-    /// ```
-    /// let led_strip = LedStrip::new(channel, dio, 7).expect("Failed to create LED strip");
-    /// ```
-    pub fn new<C, DIO>(channel: C, dio: DIO, num_leds: u8) -> Result<Self, AppError>
-    where
-        C: Peripheral<P = C> + RmtChannel + 'static,
-        DIO: IOPin,
-    {
-        let ws2812 = Ws2812Esp32Rmt::new(channel, dio)?;
-        let led_strip = LedStrip {
-            ws2812: Arc::new(Mutex::new(ws2812)),
-            num_leds,
-        };
-        Ok(led_strip)
+        let am_pm_indicator = Self { am, pm };
+
+        Ok(SharedAmPmIndicator::new(am_pm_indicator.into()))
     }
 
-    pub fn init(&mut self) -> Result<(), AppError> {
-        self.turn_off()?;
-        log::info!("Led strip initialized successfully!");
+    pub fn set_am(&mut self) -> Result<(), AppError> {
+        self.am.lock().unwrap().set_high()?;
+        self.pm.lock().unwrap().set_low()?;
 
         Ok(())
     }
 
-    /// Turns off all LEDs in the strip.
-    ///
-    /// ## Returns
-    /// A `Result` indicating success or an [AppError] on failure.
-    pub fn turn_off(&mut self) -> Result<(), AppError> {
-        let data = vec![RGB8 { r: 0, g: 0, b: 0 }; self.num_leds as usize];
-        self.ws2812.lock().unwrap().write_nocopy(data)?;
+    pub fn set_pm(&mut self) -> Result<(), AppError> {
+        self.am.lock().unwrap().set_low()?;
+        self.pm.lock().unwrap().set_high()?;
+
+        Ok(())
+    }
+
+    pub fn clear(&mut self) -> Result<(), AppError> {
+        self.am.lock().unwrap().set_low()?;
+        self.pm.lock().unwrap().set_low()?;
+
         Ok(())
     }
 }

@@ -1,4 +1,4 @@
-use chrono::{DateTime, Timelike, Utc};
+use chrono::{DateTime, Datelike, Timelike, Utc};
 use std::{
     str::FromStr,
     time::{Duration, SystemTime},
@@ -21,7 +21,7 @@ pub mod tz;
 /// ```rust
 /// let time = get_time();
 /// ```
-pub fn get_time() -> Vec<u8> {
+pub fn get_hour_min() -> Vec<u8> {
     let timezone = tz::get_timezone();
     let now_utc: DateTime<Utc> = SystemTime::now().into();
     let now =
@@ -37,6 +37,23 @@ pub fn get_time() -> Vec<u8> {
     ];
 
     time_digits.into()
+}
+
+pub fn get_year() -> Vec<u8> {
+    let timezone = tz::get_timezone();
+    let now_utc: DateTime<Utc> = SystemTime::now().into();
+    let now =
+        now_utc.with_timezone(&chrono_tz::Tz::from_str(&timezone).expect("Error reading Timezone"));
+    let year = now.year();
+
+    let year_digits: [u8; 4] = [
+        ((year / 1000) % 10) as u8,
+        ((year / 100) % 10) as u8,
+        ((year / 10) % 10) as u8,
+        (year % 10) as u8,
+    ];
+
+    year_digits.into()
 }
 
 /// Calculates the time remaining until the next minute.

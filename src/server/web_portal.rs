@@ -2,7 +2,8 @@ use crate::{
     error::AppError,
     module::{
         display::SharedSevenSegmentDisplay,
-        led::{LedStrip, SharedLedStrip},
+        led::SharedAmPmIndicator,
+        led_strip::{LedStrip, SharedLedStrip},
     },
     nvs::{self, AppStorage},
     theme::{AppTheme, Theme},
@@ -43,9 +44,10 @@ impl WebPortal {
         })
     }
 
-    pub fn create_routes<CLK: OutputPin, DIO: IOPin>(
+    pub fn create_routes<CLK: OutputPin, DIO: IOPin, AM: OutputPin, PM: OutputPin>(
         &mut self,
         display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
+        am_pm_indicator: SharedAmPmIndicator<'static, AM, PM>,
         led_strip: LedStrip<'static>,
         app_storage: AppStorage,
         sntp: EspSntp<'static>,
@@ -116,7 +118,11 @@ impl WebPortal {
             })?;
 
         self.server
-            .fn_handler("/sync_time", Method::Get, sync_time(display.clone(), sntp))
+            .fn_handler(
+                "/sync_time",
+                Method::Get,
+                sync_time(display.clone(), am_pm_indicator.clone(), sntp),
+            )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {:#?}", e);
             })?;
@@ -180,7 +186,7 @@ pub fn get_status(
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let timezone = time::tz::get_timezone();
-        let time = time::get_time();
+        let time = time::get_hour_min();
         let wifi_ssid = wifi_ssid.as_str();
 
         let status_html = format!(
@@ -336,13 +342,16 @@ where
 ///
 /// A closure that handles the HTTP request, synchronizes the time, updates the
 /// display, and returns a success message.
-pub fn sync_time<'a, CLK, DIO>(
+pub fn sync_time<'a, CLK, DIO, AM, PM>(
     display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
+    am_pm_indicator: SharedAmPmIndicator<'a, AM, PM>,
     sntp: EspSntp<'static>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
 where
     CLK: OutputPin + 'a,
     DIO: IOPin + 'a,
+    AM: OutputPin,
+    PM: OutputPin,
 {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let sync_message = DisplayMessage::Sync.as_bytes();
@@ -356,7 +365,10 @@ where
         display.lock().unwrap().write(sync_message)?;
 
         while sntp.get_sync_status() != SyncStatus::Completed {}
-        display.lock().unwrap().update_display_time()?;
+        display
+            .lock()
+            .unwrap()
+            .update_display_hour(am_pm_indicator.clone())?;
 
         log::info!("Time sync completed!");
 
