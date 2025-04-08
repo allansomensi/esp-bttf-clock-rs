@@ -211,9 +211,6 @@ fn main() -> Result<(), error::AppError> {
     std::thread::spawn(move || loop {
         let wait_time = time::calculate_time_until_next_minute();
 
-        // Wait until the next minute
-        FreeRtos::delay_ms(wait_time.as_millis() as u32);
-
         hour_display
             .lock()
             .unwrap()
@@ -231,6 +228,9 @@ fn main() -> Result<(), error::AppError> {
                 log::error!("Failed to update year display: {:#?}", e);
             })
             .unwrap();
+
+        // Wait until the next minute
+        FreeRtos::delay_ms(wait_time.as_millis() as u32);
     });
 
     loop {
