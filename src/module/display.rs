@@ -197,4 +197,19 @@ where
 
         Ok(())
     }
+
+    pub fn update_display_date(&mut self) -> Result<(), AppError> {
+        let (day, month) = time::get_day_month();
+
+        let digits = [
+            DISPLAY_DIGIT[(day / 10) as usize],
+            DISPLAY_DIGIT[(day % 10) as usize] | 0b10000000,
+            DISPLAY_DIGIT[(month / 10) as usize],
+            DISPLAY_DIGIT[(month % 10) as usize],
+        ];
+
+        self.write(digits)?;
+
+        Ok(())
+    }
 }

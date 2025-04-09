@@ -1,6 +1,6 @@
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
-    hal::{delay::FreeRtos, peripheral::Peripheral, prelude::Peripherals},
+    hal::{delay::FreeRtos, gpio::OutputPin, peripheral::Peripheral, prelude::Peripherals},
     nvs::EspDefaultNvsPartition,
     sys::esp_restart,
 };
@@ -23,7 +23,18 @@ fn main() -> Result<(), error::AppError> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
 
-    let mut peripherals = Peripherals::take()?;
+    let peripherals = Peripherals::take()?;
+
+    // Pins
+    let led_strip_rmt = peripherals.rmt.channel0;
+    let led_strip_dio = peripherals.pins.gpio5.downgrade_output();
+    let am_led_pin = peripherals.pins.gpio32.downgrade_output();
+    let pm_led_pin = peripherals.pins.gpio33.downgrade_output();
+    let mut display_clk = peripherals.pins.gpio16.downgrade_output();
+    let date_display_dio = peripherals.pins.gpio17;
+    let year_display_dio = peripherals.pins.gpio18;
+    let hour_display_dio = peripherals.pins.gpio19;
+
     let sysloop = EspSystemEventLoop::take()?;
     let nvs_default_partition = EspDefaultNvsPartition::take()?;
 
@@ -127,42 +138,51 @@ fn main() -> Result<(), error::AppError> {
     mdns.set_instance_name("espclock")?;
     mdns.add_service(None, "_http", "_tcp", 80, &[])?;
 
-    let am_pm_indicator =
-        module::led::AmPmIndicator::new(peripherals.pins.gpio32, peripherals.pins.gpio33)?;
+    // Initialize AM/PM leds
+    let am_pm_indicator = module::led::AmPmIndicator::new(am_led_pin, pm_led_pin)?;
     am_pm_indicator.lock().unwrap().clear()?;
 
-    // Initialize the hour/min display
-    let hour_display = module::display::SevenSegmentDisplay::new(
-        unsafe { peripherals.pins.gpio16.clone_unchecked() },
-        peripherals.pins.gpio18,
+    // Initialize the day/month display
+    let date_display = module::display::SevenSegmentDisplay::new(
+        unsafe { display_clk.clone_unchecked() },
+        date_display_dio,
     )
     .inspect_err(|e| {
-        log::error!("Failed to get hour display: {:#?}", e);
+        log::error!("Failed to get date display: {:#?}", e);
     })?;
-
-    hour_display.lock().unwrap().init().inspect_err(|e| {
-        log::error!("Failed to initialize hour display: {:#?}", e);
+    date_display.lock().unwrap().init().inspect_err(|e| {
+        log::error!("Failed to initialize date display: {:#?}", e);
     })?;
 
     // Initialize the year display
     let year_display = module::display::SevenSegmentDisplay::new(
-        unsafe { peripherals.pins.gpio16.clone_unchecked() },
-        peripherals.pins.gpio17,
+        unsafe { display_clk.clone_unchecked() },
+        year_display_dio,
     )
     .inspect_err(|e| {
         log::error!("Failed to get year display: {:#?}", e);
     })?;
-
     year_display.lock().unwrap().init().inspect_err(|e| {
         log::error!("Failed to initialize year display: {:#?}", e);
     })?;
 
+    // Initialize the hour/min display
+    let hour_display = module::display::SevenSegmentDisplay::new(
+        unsafe { display_clk.clone_unchecked() },
+        hour_display_dio,
+    )
+    .inspect_err(|e| {
+        log::error!("Failed to get hour display: {:#?}", e);
+    })?;
+    hour_display.lock().unwrap().init().inspect_err(|e| {
+        log::error!("Failed to initialize hour display: {:#?}", e);
+    })?;
+
     // Initialize the led strip
-    let mut led_strip =
-        module::led_strip::LedStrip::new(peripherals.rmt.channel0, peripherals.pins.gpio5, 18)
-            .inspect_err(|e| {
-                log::error!("Failed to get led strip: {:#?}", e);
-            })?;
+    let mut led_strip = module::led_strip::LedStrip::new(led_strip_rmt, led_strip_dio, 18)
+        .inspect_err(|e| {
+            log::error!("Failed to get led strip: {:#?}", e);
+        })?;
     led_strip.init()?;
 
     // Initialize SNTP
@@ -211,12 +231,12 @@ fn main() -> Result<(), error::AppError> {
     std::thread::spawn(move || loop {
         let wait_time = time::calculate_time_until_next_minute();
 
-        hour_display
+        date_display
             .lock()
             .unwrap()
-            .update_display_hour(am_pm_indicator.clone())
+            .update_display_date()
             .inspect_err(|e| {
-                log::error!("Failed to update hour/min display: {:#?}", e);
+                log::error!("Failed to update date display: {:#?}", e);
             })
             .unwrap();
 
@@ -226,6 +246,15 @@ fn main() -> Result<(), error::AppError> {
             .update_display_year()
             .inspect_err(|e| {
                 log::error!("Failed to update year display: {:#?}", e);
+            })
+            .unwrap();
+
+        hour_display
+            .lock()
+            .unwrap()
+            .update_display_hour(am_pm_indicator.clone())
+            .inspect_err(|e| {
+                log::error!("Failed to update hour/min display: {:#?}", e);
             })
             .unwrap();
 
