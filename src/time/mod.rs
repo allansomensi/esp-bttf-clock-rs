@@ -56,6 +56,18 @@ pub fn get_year() -> Vec<u8> {
     year_digits.into()
 }
 
+pub fn get_day_month() -> (u8, u8) {
+    let timezone = tz::get_timezone();
+    let now_utc: DateTime<Utc> = SystemTime::now().into();
+    let now =
+        now_utc.with_timezone(&chrono_tz::Tz::from_str(&timezone).expect("Error reading Timezone"));
+
+    let day = now.day() as u8;
+    let month = now.month() as u8;
+
+    (day, month)
+}
+
 /// Calculates the time remaining until the next minute.
 ///
 /// Returns a `Duration` representing the time to wait until the next exact
