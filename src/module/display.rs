@@ -1,5 +1,7 @@
+use super::led::SharedAmPmIndicator;
 use crate::{
     error::AppError,
+    services::led::AmPmIndicatorService,
     time,
     util::{messages::DisplayMessage, DISPLAY_DIGIT},
 };
@@ -9,8 +11,6 @@ use esp_idf_svc::hal::{
 };
 use std::sync::{Arc, Mutex};
 use tm1637::TM1637;
-
-use super::led::SharedAmPmIndicator;
 
 /// A thread-safe shared `SevenSegmentDisplay` using `Arc<Mutex<...>>`.
 pub type SharedSevenSegmentDisplay<'a, CLK, DIO> = Arc<Mutex<SevenSegmentDisplay<'a, CLK, DIO>>>;

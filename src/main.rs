@@ -6,6 +6,7 @@ use esp_idf_svc::{
 };
 use nvs::AppStorage;
 use server::{dns_responder::DnsResponder, web_portal::WebPortal};
+use services::led::AmPmIndicatorService;
 use std::{net::Ipv4Addr, str::FromStr, time::Duration};
 use theme::{AppTheme, Theme};
 use wifi::ap::AP_IP_ADDRESS;
@@ -14,6 +15,7 @@ mod error;
 mod module;
 mod nvs;
 mod server;
+mod services;
 mod theme;
 mod time;
 mod util;

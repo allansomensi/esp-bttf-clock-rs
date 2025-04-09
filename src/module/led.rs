@@ -1,4 +1,4 @@
-use crate::error::AppError;
+use crate::{error::AppError, services::led::AmPmIndicatorService};
 use esp_idf_svc::hal::{
     gpio::{Output, OutputPin, PinDriver},
     peripheral::Peripheral,
@@ -29,22 +29,28 @@ where
 
         Ok(SharedAmPmIndicator::new(am_pm_indicator.into()))
     }
+}
 
-    pub fn set_am(&mut self) -> Result<(), AppError> {
+impl<'a, AM, PM> AmPmIndicatorService for AmPmIndicator<'a, AM, PM>
+where
+    AM: Peripheral<P = AM> + OutputPin + 'a,
+    PM: Peripheral<P = PM> + OutputPin + 'a,
+{
+    fn set_am(&mut self) -> Result<(), AppError> {
         self.am.lock().unwrap().set_high()?;
         self.pm.lock().unwrap().set_low()?;
 
         Ok(())
     }
 
-    pub fn set_pm(&mut self) -> Result<(), AppError> {
+    fn set_pm(&mut self) -> Result<(), AppError> {
         self.am.lock().unwrap().set_low()?;
         self.pm.lock().unwrap().set_high()?;
 
         Ok(())
     }
 
-    pub fn clear(&mut self) -> Result<(), AppError> {
+    fn clear(&mut self) -> Result<(), AppError> {
         self.am.lock().unwrap().set_low()?;
         self.pm.lock().unwrap().set_low()?;
 
