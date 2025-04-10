@@ -6,6 +6,7 @@ use crate::{
         led_strip::{LedStrip, SharedLedStrip},
     },
     nvs::{self, AppStorage},
+    services::display::SevenSegmentDisplayService,
     theme::{AppTheme, Theme},
     time::{self, tz::TimezoneRequest},
     util::messages::DisplayMessage,

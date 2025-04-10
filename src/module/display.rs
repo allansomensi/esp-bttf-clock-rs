@@ -1,7 +1,7 @@
 use super::led::SharedAmPmIndicator;
 use crate::{
     error::AppError,
-    services::led::AmPmIndicatorService,
+    services::{display::SevenSegmentDisplayService, led::AmPmIndicatorService},
     time,
     util::{messages::DisplayMessage, DISPLAY_DIGIT},
 };
@@ -61,7 +61,13 @@ where
 
         Ok(SharedSevenSegmentDisplay::new(display.into()))
     }
+}
 
+impl<CLK, DIO> SevenSegmentDisplayService for SevenSegmentDisplay<'_, CLK, DIO>
+where
+    CLK: OutputPin,
+    DIO: IOPin,
+{
     /// Initializes the [SevenSegmentDisplay] by setting up the display and
     /// configuring the brightness.
     ///
@@ -80,7 +86,7 @@ where
     /// ```rust
     /// display.init().expect("Failed to initialize the display");
     /// ```
-    pub fn init(&mut self) -> Result<(), AppError> {
+    fn init(&mut self) -> Result<(), AppError> {
         self.tm1637.init()?;
         self.tm1637.set_brightness(3)?;
 
@@ -109,7 +115,7 @@ where
     ///     .write(*b"1234")
     ///     .expect("Failed to write to the display");
     /// ```
-    pub fn write(&mut self, message: [u8; 4]) -> Result<(), AppError> {
+    fn write(&mut self, message: [u8; 4]) -> Result<(), AppError> {
         self.tm1637.clear()?;
         self.tm1637.print_raw(0, &message)?;
 
@@ -133,7 +139,7 @@ where
     /// ```rust
     /// display.set_brightness(5).expect("Failed to set brightness");
     /// ```
-    pub fn set_brightness(&mut self, level: u8) -> Result<(), AppError> {
+    fn set_brightness(&mut self, level: u8) -> Result<(), AppError> {
         self.tm1637.set_brightness(level)?;
 
         Ok(())
@@ -157,7 +163,7 @@ where
     ///     .update_display_time()
     ///     .expect("Failed to update time on display");
     /// ```
-    pub fn update_display_hour<AM: OutputPin, PM: OutputPin>(
+    fn update_display_hour<AM: OutputPin, PM: OutputPin>(
         &mut self,
         am_pm_indicator: SharedAmPmIndicator<AM, PM>,
     ) -> Result<(), AppError> {
@@ -183,7 +189,7 @@ where
         Ok(())
     }
 
-    pub fn update_display_year(&mut self) -> Result<(), AppError> {
+    fn update_display_year(&mut self) -> Result<(), AppError> {
         let year = time::get_year();
 
         let digits = [
@@ -198,7 +204,7 @@ where
         Ok(())
     }
 
-    pub fn update_display_date(&mut self) -> Result<(), AppError> {
+    fn update_display_date(&mut self) -> Result<(), AppError> {
         let (day, month) = time::get_day_month();
 
         let digits = [
