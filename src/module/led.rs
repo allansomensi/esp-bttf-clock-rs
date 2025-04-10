@@ -1,4 +1,4 @@
-use crate::{error::AppError, services::led::AmPmIndicatorService};
+use crate::{error::AppError, service::led::AmPmIndicatorService};
 use esp_idf_svc::hal::{
     gpio::{Output, OutputPin, PinDriver},
     peripheral::Peripheral,
