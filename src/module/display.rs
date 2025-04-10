@@ -1,7 +1,7 @@
 use super::led::SharedAmPmIndicator;
 use crate::{
     error::AppError,
-    services::{display::SevenSegmentDisplayService, led::AmPmIndicatorService},
+    service::{display::SevenSegmentDisplayService, led::AmPmIndicatorService},
     time,
     util::{messages::DisplayMessage, DISPLAY_DIGIT},
 };

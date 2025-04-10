@@ -1,5 +1,6 @@
 use crate::{
     error::AppError,
+    service::led_strip::LedStripService,
     theme::{AppTheme, Theme},
 };
 use esp_idf_svc::hal::{gpio::OutputPin, peripheral::Peripheral, rmt::RmtChannel};
@@ -83,8 +84,10 @@ impl LedStrip<'_> {
         };
         Ok(led_strip)
     }
+}
 
-    pub fn init(&mut self) -> Result<(), AppError> {
+impl LedStripService for LedStrip<'_> {
+    fn init(&mut self) -> Result<(), AppError> {
         self.turn_off()?;
         log::info!("Led strip initialized successfully!");
 
@@ -95,7 +98,7 @@ impl LedStrip<'_> {
     ///
     /// ## Returns
     /// A `Result` indicating success or an [AppError] on failure.
-    pub fn turn_off(&mut self) -> Result<(), AppError> {
+    fn turn_off(&mut self) -> Result<(), AppError> {
         let data = vec![RGB8 { r: 0, g: 0, b: 0 }; self.num_leds as usize];
         self.ws2812.lock().unwrap().write_nocopy(data)?;
         Ok(())
