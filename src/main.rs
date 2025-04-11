@@ -7,7 +7,10 @@ use esp_idf_svc::{
 use nvs::AppStorage;
 use server::{dns_responder::DnsResponder, web_portal::WebPortal};
 use service::{
-    display::SevenSegmentDisplayService, led::AmPmIndicatorService, led_strip::LedStripService,
+    app_storage::{AppStorageTzService, AppStorageWifiService},
+    display::SevenSegmentDisplayService,
+    led::AmPmIndicatorService,
+    led_strip::LedStripService,
 };
 use std::{net::Ipv4Addr, str::FromStr, time::Duration};
 use theme::{AppTheme, Theme};
@@ -44,8 +47,11 @@ fn main() -> Result<(), error::AppError> {
 
     let app_storage = AppStorage::new(nvs_default_partition.clone())?;
 
-    let credentials =
-        nvs::wifi::get_maybe_wifi_credentials(&mut app_storage.wifi_nvs.lock().unwrap()).unwrap();
+    let credentials = app_storage
+        .lock()
+        .unwrap()
+        .get_maybe_wifi_credentials()
+        .unwrap();
 
     let is_ap_mode: bool;
 
@@ -88,10 +94,7 @@ fn main() -> Result<(), error::AppError> {
         )?;
 
         // Connect to the Wi-Fi network
-        wifi::station::connect_wifi_or_restart(
-            &mut wifi_station,
-            &mut app_storage.wifi_nvs.lock().unwrap(),
-        )?;
+        wifi::station::connect_wifi_or_restart(&mut wifi_station, app_storage.clone())?;
 
         wifi_station
     };
@@ -120,11 +123,10 @@ fn main() -> Result<(), error::AppError> {
 
         // If new credentials are received, store them in NVS
         if let Some(credentials) = wifi::WIFI_CREDENTIALS.lock().unwrap().clone() {
-            nvs::wifi::save_wifi_credentials(
-                &mut app_storage.wifi_nvs.lock().unwrap(),
-                credentials.ssid,
-                credentials.password,
-            );
+            app_storage
+                .lock()
+                .unwrap()
+                .save_wifi_credentials(credentials.ssid, credentials.password);
         }
 
         // Stop the AP Wi-Fi interface
@@ -198,7 +200,7 @@ fn main() -> Result<(), error::AppError> {
     })?;
 
     // Read timezone from NVS
-    let timezone = nvs::tz::get_maybe_timezone(&mut app_storage.tz_nvs.lock().unwrap());
+    let timezone = app_storage.lock().unwrap().get_maybe_timezone();
 
     if let Some(tz) = timezone.unwrap_or(None) {
         time::tz::set_timezone(tz);

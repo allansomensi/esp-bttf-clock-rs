@@ -1,9 +1,9 @@
 use super::get_wifi;
-use crate::{error::AppError, nvs};
+use crate::{error::AppError, nvs::SharedAppStorage, service::app_storage::AppStorageWifiService};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{modem::WifiModemPeripheral, peripheral::Peripheral},
-    nvs::{EspDefaultNvsPartition, EspNvs, NvsDefault},
+    nvs::EspDefaultNvsPartition,
     sys::esp_restart,
     wifi::{
         AuthMethod, BlockingWifi, ClientConfiguration, Configuration as WifiConfiguration, EspWifi,
@@ -135,7 +135,7 @@ fn configure_station(
 /// fails.
 pub fn connect_wifi_or_restart(
     wifi: &mut BlockingWifi<EspWifi<'static>>,
-    nvs: &mut EspNvs<NvsDefault>,
+    storage: SharedAppStorage,
 ) -> Result<(), AppError> {
     wifi.start()?;
     log::info!("Wifi started!");
@@ -144,7 +144,7 @@ pub fn connect_wifi_or_restart(
         Ok(_) => log::info!("Wifi connected!"),
         Err(_) => {
             log::error!("Failed to connect to Wi-Fi! Restarting...");
-            nvs::wifi::delete_wifi_credentials(nvs);
+            storage.lock().unwrap().delete_wifi_credentials()?;
             wifi.stop()?;
             unsafe {
                 esp_restart();

@@ -5,8 +5,11 @@ use crate::{
         led::SharedAmPmIndicator,
         led_strip::{LedStrip, SharedLedStrip},
     },
-    nvs::{self, AppStorage},
-    service::display::SevenSegmentDisplayService,
+    nvs::SharedAppStorage,
+    service::{
+        app_storage::{AppStorageTzService, AppStorageWifiService},
+        display::SevenSegmentDisplayService,
+    },
     theme::{AppTheme, Theme},
     time::{self, tz::TimezoneRequest},
     util::messages::DisplayMessage,
@@ -19,7 +22,6 @@ use esp_idf_svc::{
         Method,
     },
     io::Write,
-    nvs::{EspNvs, NvsDefault},
     sntp::{EspSntp, SyncStatus},
     sys::{esp_restart, esp_wifi_disconnect, sntp_restart},
 };
@@ -50,7 +52,7 @@ impl WebPortal {
         display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
         am_pm_indicator: SharedAmPmIndicator<'static, AM, PM>,
         led_strip: LedStrip<'static>,
-        app_storage: AppStorage,
+        app_storage: SharedAppStorage,
         sntp: EspSntp<'static>,
         wifi_ssid: String,
     ) -> Result<(), AppError> {
@@ -92,7 +94,7 @@ impl WebPortal {
             .fn_handler(
                 "/set_timezone",
                 Method::Post,
-                set_timezone(app_storage.tz_nvs.clone()),
+                set_timezone(app_storage.clone()),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_timezone handler: {:#?}", e);
@@ -102,7 +104,7 @@ impl WebPortal {
             .fn_handler(
                 "/factory_reset",
                 Method::Get,
-                factory_reset(app_storage.wifi_nvs, app_storage.tz_nvs),
+                factory_reset(app_storage.clone()),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {:#?}", e);
@@ -219,7 +221,7 @@ pub fn get_status(
 /// A closure that handles the HTTP request, validates the timezone, updates the
 /// system timezone, saves the data in NVS, and responds with a success message.
 pub fn set_timezone(
-    tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+    storage: SharedAppStorage,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |mut request: Request<&mut EspHttpConnection<'_>>| {
         let mut buf = [0u8; 128];
@@ -241,8 +243,10 @@ pub fn set_timezone(
             return Err(AppError::Server("Invalid request".to_string()));
         }
 
-        let mut tz_lock = tz_nvs.lock().unwrap();
-        nvs::tz::save_timezone(&mut tz_lock, timezone_data.clone());
+        storage
+            .lock()
+            .unwrap()
+            .save_timezone(timezone_data.clone())?;
         time::tz::set_timezone(timezone_data.timezone);
 
         request
@@ -269,12 +273,11 @@ pub fn set_timezone(
 /// - This function does not return control after execution, as the device
 ///   restarts.
 pub fn factory_reset(
-    wifi_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
-    tz_nvs: Arc<Mutex<EspNvs<NvsDefault>>>,
+    storage: SharedAppStorage,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
     move |_: Request<&mut EspHttpConnection<'_>>| {
-        nvs::wifi::delete_wifi_credentials(&mut wifi_nvs.lock().unwrap());
-        nvs::tz::delete_timezone(&mut tz_nvs.lock().unwrap());
+        storage.lock().unwrap().delete_wifi_credentials()?;
+        storage.lock().unwrap().delete_timezone()?;
         log::info!("Factory reset initiated!");
         log::info!("Restarting...");
 
