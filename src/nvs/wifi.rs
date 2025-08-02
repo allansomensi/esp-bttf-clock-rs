@@ -38,7 +38,7 @@ impl AppStorageWifiService for AppStorage {
             &to_vec::<WifiCredentials, 100>(&key_wifi_credentials_data).unwrap(),
         ) {
             Ok(_) => log::info!("Key {key_wifi_credentials} updated"),
-            Err(e) => log::error!("key {key_wifi_credentials} not updated {:?}", e),
+            Err(e) => log::error!("key {key_wifi_credentials} not updated {e:?}"),
         };
     }
 
@@ -72,7 +72,7 @@ impl AppStorageWifiService for AppStorage {
     ///         credentials.ssid, credentials.password
     ///     ),
     ///     Ok(None) => println!("No credentials found."),
-    ///     Err(e) => eprintln!("Error retrieving credentials: {}", e),
+    ///     Err(e) => eprintln!("Error retrieving credentials: {e}"),
     /// }
     /// ```
     fn get_maybe_wifi_credentials(&mut self) -> Result<Option<WifiCredentials>, String> {
@@ -85,11 +85,10 @@ impl AppStorageWifiService for AppStorage {
         {
             Ok(Some(credentials_bytes)) => from_bytes::<WifiCredentials>(credentials_bytes)
                 .map(Some)
-                .map_err(|e| format!("Failed to deserialize Wi-Fi credentials: {:?}", e)),
+                .map_err(|e| format!("Failed to deserialize Wi-Fi credentials: {e:?}")),
             Ok(None) => Ok(None),
             Err(e) => Err(format!(
-                "Couldn't get key {key_wifi_credentials} because {:?}",
-                e
+                "Couldn't get key {key_wifi_credentials} because {e:?}"
             )),
         }
     }
@@ -117,7 +116,7 @@ impl AppStorageWifiService for AppStorage {
 
         match self.wifi_nvs.remove(key_wifi_credentials) {
             Ok(_) => log::info!("Key {key_wifi_credentials} deleted"),
-            Err(e) => log::error!("key {key_wifi_credentials} not deleted {:?}", e),
+            Err(e) => log::error!("key {key_wifi_credentials} not deleted {e:?}"),
         };
 
         Ok(())

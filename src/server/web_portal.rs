@@ -42,7 +42,7 @@ impl WebPortal {
     pub fn new() -> Result<Self, AppError> {
         Ok(Self {
             server: super::create_server().inspect_err(|e| {
-                log::error!("Failed to start HTTP server: {:#?}", e);
+                log::error!("Failed to start HTTP server: {e:#?}");
             })?,
         })
     }
@@ -59,25 +59,25 @@ impl WebPortal {
         self.server
             .fn_handler("/", Method::Get, web_portal())
             .inspect_err(|&e| {
-                log::error!("Failed to register web portal handler: {:#?}", e);
+                log::error!("Failed to register web portal handler: {e:#?}");
             })?;
 
         self.server
             .fn_handler("/assets/index.css", Method::Get, web_portal_css())
             .inspect_err(|&e| {
-                log::error!("Failed to serve CSS: {:#?}", e);
+                log::error!("Failed to serve CSS: {e:#?}");
             })?;
 
         self.server
             .fn_handler("/assets/js/index.js", Method::Get, web_portal_js())
             .inspect_err(|&e| {
-                log::error!("Failed to serve JS: {:#?}", e);
+                log::error!("Failed to serve JS: {e:#?}");
             })?;
 
         self.server
             .fn_handler("/get_status", Method::Get, get_status(wifi_ssid))
             .inspect_err(|&e| {
-                log::error!("Failed to register get_status handler: {:#?}", e);
+                log::error!("Failed to register get_status handler: {e:#?}");
             })?;
 
         self.server
@@ -87,7 +87,7 @@ impl WebPortal {
                 set_theme(Arc::new(Mutex::new(led_strip))),
             )
             .inspect_err(|&e| {
-                log::error!("Failed to register set_theme handler: {:#?}", e);
+                log::error!("Failed to register set_theme handler: {e:#?}");
             })?;
 
         self.server
@@ -97,7 +97,7 @@ impl WebPortal {
                 set_timezone(app_storage.clone()),
             )
             .inspect_err(|&e| {
-                log::error!("Failed to register set_timezone handler: {:#?}", e);
+                log::error!("Failed to register set_timezone handler: {e:#?}");
             })?;
 
         self.server
@@ -107,7 +107,7 @@ impl WebPortal {
                 factory_reset(app_storage.clone()),
             )
             .inspect_err(|&e| {
-                log::error!("Failed to register sync_time handler: {:#?}", e);
+                log::error!("Failed to register sync_time handler: {e:#?}");
             })?;
 
         self.server
@@ -117,7 +117,7 @@ impl WebPortal {
                 set_brightness(display.clone()),
             )
             .inspect_err(|&e| {
-                log::error!("Failed to register set_brightness handler: {:#?}", e);
+                log::error!("Failed to register set_brightness handler: {e:#?}");
             })?;
 
         self.server
@@ -127,7 +127,7 @@ impl WebPortal {
                 sync_time(display.clone(), am_pm_indicator.clone(), sntp),
             )
             .inspect_err(|&e| {
-                log::error!("Failed to register sync_time handler: {:#?}", e);
+                log::error!("Failed to register sync_time handler: {e:#?}");
             })?;
 
         Ok(())

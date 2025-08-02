@@ -22,12 +22,12 @@ pub enum AppError {
 
 impl From<tm1637::Error<esp_idf_svc::sys::EspError>> for AppError {
     fn from(value: tm1637::Error<esp_idf_svc::sys::EspError>) -> Self {
-        AppError::Display(format!("{:?}", value))
+        AppError::Display(format!("{value:?}"))
     }
 }
 
 impl From<ws2812_esp32_rmt_driver::Ws2812Esp32RmtDriverError> for AppError {
     fn from(value: ws2812_esp32_rmt_driver::Ws2812Esp32RmtDriverError) -> Self {
-        AppError::LedStrip(format!("{:?}", value))
+        AppError::LedStrip(format!("{value:?}"))
     }
 }

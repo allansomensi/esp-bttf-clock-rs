@@ -35,7 +35,7 @@ impl AppStorageTzService for AppStorage {
 
         match self.tz_nvs.set_str(key_timezone, key_timezone_data) {
             Ok(_) => log::info!("Key {key_timezone} updated"),
-            Err(e) => log::error!("key {key_timezone} not updated {:?}", e),
+            Err(e) => log::error!("key {key_timezone} not updated {e:?}"),
         };
 
         Ok(())
@@ -64,9 +64,9 @@ impl AppStorageTzService for AppStorage {
     /// ```rust
     /// let mut tz_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// match get_maybe_timezone(&mut tz_nvs) {
-    ///     Ok(Some(timezone)) => println!("Stored timezone: {}", timezone),
+    ///     Ok(Some(timezone)) => println!("Stored timezone: {timezone}"),
     ///     Ok(None) => println!("No timezone found."),
-    ///     Err(e) => eprintln!("Error retrieving timezone: {}", e),
+    ///     Err(e) => eprintln!("Error retrieving timezone: {e}"),
     /// }
     /// ```
     fn get_maybe_timezone(&mut self) -> Result<Option<String>, String> {
@@ -76,7 +76,7 @@ impl AppStorageTzService for AppStorage {
         match self.tz_nvs.get_str(key_timezone, &mut key_timezone_data) {
             Ok(Some(timezone_str)) => Ok(Some(timezone_str.to_string())),
             Ok(None) => Ok(None),
-            Err(e) => Err(format!("Couldn't get key {key_timezone} because {:?}", e)),
+            Err(e) => Err(format!("Couldn't get key {key_timezone} because {e:?}")),
         }
     }
 
@@ -103,7 +103,7 @@ impl AppStorageTzService for AppStorage {
 
         match self.tz_nvs.remove(key_timezone) {
             Ok(_) => log::info!("Key {key_timezone} deleted"),
-            Err(e) => log::error!("key {key_timezone} not deleted {:?}", e),
+            Err(e) => log::error!("key {key_timezone} not deleted {e:?}"),
         };
 
         Ok(())

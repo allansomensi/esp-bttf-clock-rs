@@ -157,7 +157,7 @@ pub fn connect_wifi_or_restart(
 
     while !wifi.is_connected()? {
         let config = wifi.get_configuration()?;
-        log::info!("Waiting for connection... {:?}", config);
+        log::info!("Waiting for connection... {config:?}");
     }
     log::info!("Wifi done!");
 

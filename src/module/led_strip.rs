@@ -3,7 +3,7 @@ use crate::{
     service::led_strip::LedStripService,
     theme::{AppTheme, Theme},
 };
-use esp_idf_svc::hal::{gpio::OutputPin, peripheral::Peripheral, rmt::RmtChannel};
+use esp_idf_svc::hal::{delay::FreeRtos, gpio::OutputPin, peripheral::Peripheral, rmt::RmtChannel};
 use std::sync::{Arc, Mutex};
 use ws2812_esp32_rmt_driver::{Ws2812Esp32Rmt, RGB8};
 
@@ -22,29 +22,56 @@ impl AppTheme for LedStrip<'_> {
     /// ## Returns
     /// A `Result` indicating success or an `AppError` on failure.
     fn apply_theme(&mut self, theme: &Theme) -> Result<(), AppError> {
-        let brightness = 0.1;
+        let brightness = 0.5;
 
-        let color = match theme {
-            Theme::Orange => RGB8 {
-                r: (255.0 * brightness) as u8,
-                g: (0.0 * brightness) as u8,
-                b: (0.0 * brightness) as u8,
-            },
-            Theme::Green => RGB8 {
-                r: (0.0 * brightness) as u8,
-                g: (255.0 * brightness) as u8,
-                b: (0.0 * brightness) as u8,
-            },
-            Theme::Blue => RGB8 {
-                r: (0.0 * brightness) as u8,
-                g: (0.0 * brightness) as u8,
-                b: (255.0 * brightness) as u8,
-            },
+        let mut data: Vec<RGB8> = Vec::with_capacity(self.num_leds as usize);
+
+        match theme {
+            Theme::Orange => {
+                let red = RGB8 {
+                    r: (255.0 * brightness) as u8,
+                    g: (0.0 * brightness) as u8,
+                    b: (0.0 * brightness) as u8,
+                };
+                let yellow = RGB8 {
+                    r: (160.0 * brightness) as u8,
+                    g: (160.0 * brightness) as u8,
+                    b: (0.0 * brightness) as u8,
+                };
+
+                let center_start = self.num_leds / 3;
+                let center_end = 2 * self.num_leds / 3;
+
+                for i in 0..self.num_leds {
+                    if i >= center_start && i < center_end {
+                        data.push(yellow);
+                    } else {
+                        data.push(red);
+                    }
+                }
+            }
+            Theme::Green => {
+                let color = RGB8 {
+                    r: (0.0 * brightness) as u8,
+                    g: (255.0 * brightness) as u8,
+                    b: (0.0 * brightness) as u8,
+                };
+                data.resize(self.num_leds as usize, color);
+            }
+            Theme::Blue => {
+                let color = RGB8 {
+                    r: (0.0 * brightness) as u8,
+                    g: (0.0 * brightness) as u8,
+                    b: (255.0 * brightness) as u8,
+                };
+                data.resize(self.num_leds as usize, color);
+            }
         };
 
-        let data = vec![color; self.num_leds as usize];
-
-        self.ws2812.lock().unwrap().write_nocopy(data)?;
+        for _ in 0..5 {
+            self.ws2812.lock().unwrap().write_nocopy(data.clone())?;
+            FreeRtos::delay_ms(1);
+        }
         Ok(())
     }
 }

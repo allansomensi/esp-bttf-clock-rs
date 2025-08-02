@@ -39,8 +39,8 @@ fn main() -> Result<(), error::AppError> {
     let pm_led_pin = peripherals.pins.gpio33.downgrade_output();
     let mut display_clk = peripherals.pins.gpio16.downgrade_output();
     let date_display_dio = peripherals.pins.gpio17;
-    let year_display_dio = peripherals.pins.gpio18;
-    let hour_display_dio = peripherals.pins.gpio19;
+    let year_display_dio = peripherals.pins.gpio19;
+    let hour_display_dio = peripherals.pins.gpio26;
 
     let sysloop = EspSystemEventLoop::take()?;
     let nvs_default_partition = EspDefaultNvsPartition::take()?;
@@ -154,10 +154,10 @@ fn main() -> Result<(), error::AppError> {
         date_display_dio,
     )
     .inspect_err(|e| {
-        log::error!("Failed to get date display: {:#?}", e);
+        log::error!("Failed to get date display: {e:#?}");
     })?;
     date_display.lock().unwrap().init().inspect_err(|e| {
-        log::error!("Failed to initialize date display: {:#?}", e);
+        log::error!("Failed to initialize date display: {e:#?}");
     })?;
 
     // Initialize the year display
@@ -166,10 +166,10 @@ fn main() -> Result<(), error::AppError> {
         year_display_dio,
     )
     .inspect_err(|e| {
-        log::error!("Failed to get year display: {:#?}", e);
+        log::error!("Failed to get year display: {e:#?}");
     })?;
     year_display.lock().unwrap().init().inspect_err(|e| {
-        log::error!("Failed to initialize year display: {:#?}", e);
+        log::error!("Failed to initialize year display: {e:#?}");
     })?;
 
     // Initialize the hour/min display
@@ -178,25 +178,25 @@ fn main() -> Result<(), error::AppError> {
         hour_display_dio,
     )
     .inspect_err(|e| {
-        log::error!("Failed to get hour display: {:#?}", e);
+        log::error!("Failed to get hour display: {e:#?}");
     })?;
     hour_display.lock().unwrap().init().inspect_err(|e| {
-        log::error!("Failed to initialize hour display: {:#?}", e);
+        log::error!("Failed to initialize hour display: {e:#?}");
     })?;
 
     // Initialize the led strip
     let mut led_strip = module::led_strip::LedStrip::new(led_strip_rmt, led_strip_dio, 18)
         .inspect_err(|e| {
-            log::error!("Failed to get led strip: {:#?}", e);
+            log::error!("Failed to get led strip: {e:#?}");
         })?;
     led_strip.init()?;
 
     // Initialize SNTP
     let sntp = time::sntp::get_sntp().inspect_err(|e| {
-        log::error!("Failed to get SNTP: {:#?}", e);
+        log::error!("Failed to get SNTP: {e:#?}");
     })?;
     time::sntp::init_sntp(&sntp).inspect_err(|e| {
-        log::error!("Failed to initialize SNTP: {:#?}", e);
+        log::error!("Failed to initialize SNTP: {e:#?}");
     })?;
 
     // Read timezone from NVS
@@ -242,7 +242,7 @@ fn main() -> Result<(), error::AppError> {
             .unwrap()
             .update_display_date()
             .inspect_err(|e| {
-                log::error!("Failed to update date display: {:#?}", e);
+                log::error!("Failed to update date display: {e:#?}");
             })
             .unwrap();
 
@@ -251,7 +251,7 @@ fn main() -> Result<(), error::AppError> {
             .unwrap()
             .update_display_year()
             .inspect_err(|e| {
-                log::error!("Failed to update year display: {:#?}", e);
+                log::error!("Failed to update year display: {e:#?}");
             })
             .unwrap();
 
@@ -260,7 +260,7 @@ fn main() -> Result<(), error::AppError> {
             .unwrap()
             .update_display_hour(am_pm_indicator.clone())
             .inspect_err(|e| {
-                log::error!("Failed to update hour/min display: {:#?}", e);
+                log::error!("Failed to update hour/min display: {e:#?}");
             })
             .unwrap();
 

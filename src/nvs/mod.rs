@@ -24,7 +24,7 @@ impl AppStorage {
                 log::info!("Got namespace {WIFI_NAMESPACE} from default partition");
                 nvs
             }
-            Err(e) => panic!("Could't get wifi namespace {:?}", e),
+            Err(e) => panic!("Could't get wifi namespace {e:?}"),
         };
 
         // Initialize Timezone NVS
@@ -33,7 +33,7 @@ impl AppStorage {
                 log::info!("Got namespace {TZ_NAMESPACE} from default partition");
                 nvs
             }
-            Err(e) => panic!("Could't get tz namespace {:?}", e),
+            Err(e) => panic!("Could't get tz namespace {e:?}"),
         };
 
         let app_storage = Self { wifi_nvs, tz_nvs };

@@ -88,7 +88,7 @@ where
     /// ```
     fn init(&mut self) -> Result<(), AppError> {
         self.tm1637.init()?;
-        self.tm1637.set_brightness(3)?;
+        self.tm1637.set_brightness(1)?;
 
         self.write(DisplayMessage::Init.as_bytes())?;
 
