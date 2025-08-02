@@ -20,6 +20,15 @@ pub struct SevenSegmentDisplay<'a, CLK: OutputPin, DIO: IOPin> {
     tm1637: TM1637<'a, PinDriver<'a, CLK, Output>, PinDriver<'a, DIO, InputOutput>, Ets>,
 }
 
+pub struct DisplayGroup<'a, CLK: OutputPin, DateDIO: IOPin, YearDIO: IOPin, HourDIO: IOPin> {
+    pub date: SharedSevenSegmentDisplay<'a, CLK, DateDIO>,
+    pub year: SharedSevenSegmentDisplay<'a, CLK, YearDIO>,
+    pub hour: SharedSevenSegmentDisplay<'a, CLK, HourDIO>,
+}
+
+pub type SharedDisplayGroup<'a, CLK, DateDIO, YearDIO, HourDIO> =
+    Arc<Mutex<DisplayGroup<'static, CLK, DateDIO, YearDIO, HourDIO>>>;
+
 impl<CLK, DIO> SevenSegmentDisplay<'_, CLK, DIO>
 where
     CLK: OutputPin,

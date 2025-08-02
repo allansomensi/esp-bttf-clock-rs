@@ -1,7 +1,7 @@
 use crate::{
     error::AppError,
     module::{
-        display::SharedSevenSegmentDisplay,
+        display::SharedDisplayGroup,
         led::SharedAmPmIndicator,
         led_strip::{LedStrip, SharedLedStrip},
     },
@@ -16,7 +16,10 @@ use crate::{
 };
 use chrono_tz::Tz;
 use esp_idf_svc::{
-    hal::gpio::{IOPin, OutputPin},
+    hal::{
+        delay::FreeRtos,
+        gpio::{IOPin, OutputPin},
+    },
     http::{
         server::{EspHttpConnection, EspHttpServer, Request},
         Method,
@@ -47,9 +50,16 @@ impl WebPortal {
         })
     }
 
-    pub fn create_routes<CLK: OutputPin, DIO: IOPin, AM: OutputPin, PM: OutputPin>(
+    pub fn create_routes<
+        CLK: OutputPin,
+        DateDIO: IOPin,
+        YearDIO: IOPin,
+        HourDIO: IOPin,
+        AM: OutputPin,
+        PM: OutputPin,
+    >(
         &mut self,
-        display: SharedSevenSegmentDisplay<'static, CLK, DIO>,
+        display_group: SharedDisplayGroup<'static, CLK, DateDIO, YearDIO, HourDIO>,
         am_pm_indicator: SharedAmPmIndicator<'static, AM, PM>,
         led_strip: LedStrip<'static>,
         app_storage: SharedAppStorage,
@@ -114,7 +124,7 @@ impl WebPortal {
             .fn_handler(
                 "/set_brightness",
                 Method::Get,
-                set_brightness(display.clone()),
+                set_brightness(display_group.clone()),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_brightness handler: {e:#?}");
@@ -124,7 +134,7 @@ impl WebPortal {
             .fn_handler(
                 "/sync_time",
                 Method::Get,
-                sync_time(display.clone(), am_pm_indicator.clone(), sntp),
+                sync_time(display_group, am_pm_indicator.clone(), sntp),
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register sync_time handler: {e:#?}");
@@ -302,12 +312,14 @@ pub fn factory_reset(
 ///
 /// A closure that handles the HTTP request, updates the brightness, and returns
 /// a success message.
-pub fn set_brightness<'a, CLK, DIO>(
-    display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
+pub fn set_brightness<'a, CLK, DateDIO, YearDIO, HourDIO>(
+    display_group: SharedDisplayGroup<'static, CLK, DateDIO, YearDIO, HourDIO>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
 where
     CLK: OutputPin + 'a,
-    DIO: IOPin + 'a,
+    DateDIO: IOPin + 'a,
+    YearDIO: IOPin + 'a,
+    HourDIO: IOPin + 'a,
 {
     move |request: Request<&mut EspHttpConnection<'_>>| {
         let url = request.uri();
@@ -316,7 +328,31 @@ where
             let brightness_value = &url[start + 1..];
             if let Ok(brightness) = brightness_value.parse::<u8>() {
                 if (0..=7).contains(&brightness) {
-                    display.lock().unwrap().set_brightness(brightness)?;
+                    display_group
+                        .lock()
+                        .unwrap()
+                        .date
+                        .lock()
+                        .unwrap()
+                        .set_brightness(brightness)?;
+                    FreeRtos::delay_ms(200);
+
+                    display_group
+                        .lock()
+                        .unwrap()
+                        .year
+                        .lock()
+                        .unwrap()
+                        .set_brightness(brightness)?;
+                    FreeRtos::delay_ms(200);
+
+                    display_group
+                        .lock()
+                        .unwrap()
+                        .hour
+                        .lock()
+                        .unwrap()
+                        .set_brightness(brightness)?;
                     log::info!("Brightness updated to level {brightness}");
                 }
             }
@@ -346,14 +382,16 @@ where
 ///
 /// A closure that handles the HTTP request, synchronizes the time, updates the
 /// display, and returns a success message.
-pub fn sync_time<'a, CLK, DIO, AM, PM>(
-    display: SharedSevenSegmentDisplay<'a, CLK, DIO>,
+pub fn sync_time<'a, CLK, DateDIO, YearDIO, HourDIO, AM, PM>(
+    display_group: SharedDisplayGroup<'static, CLK, DateDIO, YearDIO, HourDIO>,
     am_pm_indicator: SharedAmPmIndicator<'a, AM, PM>,
     sntp: EspSntp<'static>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> + Send + 'a
 where
     CLK: OutputPin + 'a,
-    DIO: IOPin + 'a,
+    DateDIO: IOPin + 'a,
+    YearDIO: IOPin + 'a,
+    HourDIO: IOPin + 'a,
     AM: OutputPin,
     PM: OutputPin,
 {
@@ -366,10 +404,20 @@ where
 
         log::info!("Synchronizing with SNTP Server");
 
-        display.lock().unwrap().write(sync_message)?;
+        display_group
+            .lock()
+            .unwrap()
+            .hour
+            .lock()
+            .unwrap()
+            .write(sync_message)?;
 
         while sntp.get_sync_status() != SyncStatus::Completed {}
-        display
+
+        display_group
+            .lock()
+            .unwrap()
+            .hour
             .lock()
             .unwrap()
             .update_display_hour(am_pm_indicator.clone())?;

@@ -12,9 +12,11 @@ use service::{
     led::AmPmIndicatorService,
     led_strip::LedStripService,
 };
-use std::{net::Ipv4Addr, str::FromStr, time::Duration};
+use std::{net::Ipv4Addr, str::FromStr, sync::Mutex, time::Duration};
 use theme::{AppTheme, Theme};
 use wifi::ap::AP_IP_ADDRESS;
+
+use crate::module::display::{DisplayGroup, SharedDisplayGroup};
 
 mod error;
 mod module;
@@ -184,6 +186,12 @@ fn main() -> Result<(), error::AppError> {
         log::error!("Failed to initialize hour display: {e:#?}");
     })?;
 
+    let display_group = SharedDisplayGroup::new(Mutex::new(DisplayGroup {
+        date: date_display.clone(),
+        year: year_display.clone(),
+        hour: hour_display.clone(),
+    }));
+
     // Initialize the led strip
     let mut led_strip = module::led_strip::LedStrip::new(led_strip_rmt, led_strip_dio, 18)
         .inspect_err(|e| {
@@ -225,7 +233,7 @@ fn main() -> Result<(), error::AppError> {
 
     // Define HTTP routes
     web_portal.create_routes(
-        hour_display.clone(),
+        display_group,
         am_pm_indicator.clone(),
         led_strip,
         app_storage,
