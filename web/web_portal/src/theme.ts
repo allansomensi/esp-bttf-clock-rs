@@ -6,5 +6,11 @@ export function setTheme(): void {
         method: "GET",
     })
         .then((response) => response.text())
+        .then(() => {
+            const messageElement = document.getElementById(
+                "message"
+            ) as HTMLElement;
+            messageElement.innerText = "Theme changed!";
+        })
         .catch((error) => console.error("Error changing theme:", error));
 }

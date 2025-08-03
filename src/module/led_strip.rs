@@ -22,12 +22,12 @@ impl AppTheme for LedStrip<'_> {
     /// ## Returns
     /// A `Result` indicating success or an `AppError` on failure.
     fn apply_theme(&mut self, theme: &Theme) -> Result<(), AppError> {
-        let brightness = 0.5;
+        let brightness = 0.25;
 
         let mut data: Vec<RGB8> = Vec::with_capacity(self.num_leds as usize);
 
         match theme {
-            Theme::Orange => {
+            Theme::Original => {
                 let red = RGB8 {
                     r: (255.0 * brightness) as u8,
                     g: (0.0 * brightness) as u8,
@@ -50,21 +50,129 @@ impl AppTheme for LedStrip<'_> {
                     }
                 }
             }
-            Theme::Green => {
-                let color = RGB8 {
-                    r: (0.0 * brightness) as u8,
-                    g: (255.0 * brightness) as u8,
-                    b: (0.0 * brightness) as u8,
-                };
-                data.resize(self.num_leds as usize, color);
+
+            Theme::Hoverboard => {
+                let vibrant_yellow = RGB8::new(
+                    (255.0 * brightness) as u8,
+                    (255.0 * brightness) as u8,
+                    (0.0 * brightness) as u8,
+                );
+                let shocking_pink = RGB8::new(
+                    (255.0 * brightness) as u8,
+                    (20.0 * brightness) as u8,
+                    (147.0 * brightness) as u8,
+                );
+                let lime_green = RGB8::new(
+                    (50.0 * brightness) as u8,
+                    (205.0 * brightness) as u8,
+                    (50.0 * brightness) as u8,
+                );
+
+                let bottom_end = self.num_leds / 3;
+                let middle_end = 2 * self.num_leds / 3;
+
+                for i in 0..self.num_leds {
+                    if i < bottom_end {
+                        data.push(vibrant_yellow);
+                    } else if i < middle_end {
+                        data.push(shocking_pink);
+                    } else {
+                        data.push(lime_green);
+                    }
+                }
             }
-            Theme::Blue => {
-                let color = RGB8 {
-                    r: (0.0 * brightness) as u8,
-                    g: (0.0 * brightness) as u8,
-                    b: (255.0 * brightness) as u8,
-                };
-                data.resize(self.num_leds as usize, color);
+
+            Theme::Plutonium => {
+                let caution_yellow = RGB8::new(
+                    (255.0 * brightness) as u8,
+                    (255.0 * brightness) as u8,
+                    (0.0 * brightness) as u8,
+                );
+                let radioactive_green = RGB8::new(
+                    (124.0 * brightness) as u8,
+                    (252.0 * brightness) as u8,
+                    (0.0 * brightness) as u8,
+                );
+                let lead_gray = RGB8::new(
+                    (119.0 * brightness) as u8,
+                    (136.0 * brightness) as u8,
+                    (153.0 * brightness) as u8,
+                );
+
+                let bottom_end = self.num_leds / 3;
+                let middle_end = 2 * self.num_leds / 3;
+
+                for i in 0..self.num_leds {
+                    if i < bottom_end {
+                        data.push(caution_yellow);
+                    } else if i < middle_end {
+                        data.push(radioactive_green);
+                    } else {
+                        data.push(lead_gray);
+                    }
+                }
+            }
+
+            Theme::OldWest => {
+                let bronze = RGB8::new(
+                    (205.0 * brightness) as u8,
+                    (127.0 * brightness) as u8,
+                    (50.0 * brightness) as u8,
+                );
+                let steam_white = RGB8::new(
+                    (245.0 * brightness) as u8,
+                    (245.0 * brightness) as u8,
+                    (245.0 * brightness) as u8,
+                );
+                let sepia = RGB8::new(
+                    (112.0 * brightness) as u8,
+                    (66.0 * brightness) as u8,
+                    (20.0 * brightness) as u8,
+                );
+
+                let bottom_end = self.num_leds / 3;
+                let middle_end = 2 * self.num_leds / 3;
+
+                for i in 0..self.num_leds {
+                    if i < bottom_end {
+                        data.push(bronze);
+                    } else if i < middle_end {
+                        data.push(steam_white);
+                    } else {
+                        data.push(sepia);
+                    }
+                }
+            }
+
+            Theme::Cafe80s => {
+                let turquoise = RGB8::new(
+                    (64.0 * brightness) as u8,
+                    (224.0 * brightness) as u8,
+                    (208.0 * brightness) as u8,
+                );
+                let neon_pink = RGB8::new(
+                    (255.0 * brightness) as u8,
+                    (105.0 * brightness) as u8,
+                    (180.0 * brightness) as u8,
+                );
+                let electric_purple = RGB8::new(
+                    (128.0 * brightness) as u8,
+                    (0.0 * brightness) as u8,
+                    (128.0 * brightness) as u8,
+                );
+
+                let bottom_end = self.num_leds / 3;
+                let middle_end = 2 * self.num_leds / 3;
+
+                for i in 0..self.num_leds {
+                    if i < bottom_end {
+                        data.push(turquoise);
+                    } else if i < middle_end {
+                        data.push(neon_pink);
+                    } else {
+                        data.push(electric_purple);
+                    }
+                }
             }
         };
 

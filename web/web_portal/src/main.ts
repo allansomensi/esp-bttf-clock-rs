@@ -32,7 +32,7 @@ if (app) {
     ) as HTMLSelectElement;
 
     brightnessInput.value = "";
-    themeSelect.value = "orange";
+    themeSelect.value = "original";
 
     themeSelect.addEventListener("change", setTheme);
 
@@ -45,7 +45,7 @@ if (app) {
 function createHTMLContent(): string {
     return `
         <div class="container">
-            <h1>ESP Server</h1>
+            <h1>ESP-BTTF-CLOCK-RS</h1>
             <p id="message" class="message"></p>
 
             <!-- Display -->
@@ -72,9 +72,11 @@ function createHTMLContent(): string {
             <h2>Theme</h2>
             <div class="row">
                 <select id="themeSelect">
-                    <option value="orange">Orange</option>
-                    <option value="blue">Blue</option>
-                    <option value="green">Green</option>
+                    <option value="original">Original</option>
+                    <option value="hoverboard">Hoverboard</option>
+                    <option value="plutonium">Plutonium</option>
+                    <option value="oldwest">Old West</option>
+                    <option value="cafe80s">Cafe 80's</option>
                 </select>
             </div>
 

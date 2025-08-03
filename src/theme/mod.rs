@@ -1,12 +1,14 @@
 pub enum Theme {
-    Orange,
-    Blue,
-    Green,
+    Original,
+    Hoverboard,
+    Plutonium,
+    OldWest,
+    Cafe80s,
 }
 
 impl Default for Theme {
     fn default() -> Self {
-        Self::Orange
+        Self::Original
     }
 }
 

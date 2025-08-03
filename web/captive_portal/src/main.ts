@@ -13,7 +13,7 @@ if (app) {
 function createHTMLContent(): string {
     return `
         <div class="container">
-            <h1>Back to the Future Clock</h1>
+            <h1>Wi-Fi LOGIN</h1>
 
             <h2>Wi-Fi Settings</h2>
             <div class="row">

@@ -455,20 +455,28 @@ pub fn set_theme(
             let theme_value = &url[start + 1..];
 
             match theme_value {
-                "orange" => {
-                    led_strip.lock().unwrap().apply_theme(&Theme::Orange)?;
-                    log::info!("Theme changed to Orange");
+                "original" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::Original)?;
+                    log::info!("Theme changed to 'Original'");
                 }
-                "green" => {
-                    led_strip.lock().unwrap().apply_theme(&Theme::Green)?;
-                    log::info!("Theme changed to Green");
+                "hoverboard" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::Hoverboard)?;
+                    log::info!("Theme changed to 'Hoverboard'");
                 }
-                "blue" => {
-                    led_strip.lock().unwrap().apply_theme(&Theme::Blue)?;
-                    log::info!("Theme changed to Blue");
+                "plutonium" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::Plutonium)?;
+                    log::info!("Theme changed to 'Plutonium'");
+                }
+                "oldwest" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::OldWest)?;
+                    log::info!("Theme changed to 'OldWest'");
+                }
+                "cafe80s" => {
+                    led_strip.lock().unwrap().apply_theme(&Theme::Cafe80s)?;
+                    log::info!("Theme changed to 'Cafe80s'");
                 }
                 _ => {
-                    log::warn!("Invalid theme: {theme_value}");
+                    log::warn!("Invalid theme: '{theme_value}'");
                     return Err(AppError::Server("Invalid request".to_string()));
                 }
             }

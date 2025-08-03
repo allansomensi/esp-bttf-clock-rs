@@ -1,129 +1,116 @@
-body {
-    font-family: "Segoe UI", "Roboto", sans-serif;
-    background: linear-gradient(135deg, #1e1e2f 0%, #2a2a4a 100%);
+:root {
+    --primary-color: #007bff;
+    --bg-dark: #121212;
+    --bg-light: #1e1e1e;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --border-color: #333333;
+    --transition-speed: 0.2s;
+}
+
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    color: #e0e0e0;
-    overflow-x: hidden;
+    padding: 20px;
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     width: 100%;
     max-width: 450px;
+    background-color: var(--bg-light);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.container:hover {
-    transform: translateY(-5px);
 }
 
 h1 {
-    font-size: 42px;
-    color: #ffffff;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 15px;
 }
 
 h2 {
-    font-size: 18px;
-    color: #b0b0d0;
-    margin-bottom: 25px;
-    font-weight: 300;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-bottom: 30px;
 }
 
 .row {
-    margin: 20px 0;
+    margin-bottom: 20px;
 }
 
-.row input {
-    width: 100%;
-    padding: 14px 18px;
-    font-size: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    transition: all 0.3s ease;
+/* Remove a margem do último elemento para um espaçamento mais limpo */
+.row:last-child {
+    margin-bottom: 0;
 }
 
-.row input:focus {
-    border-color: #00ddeb;
-    box-shadow: 0 0 15px rgba(0, 221, 235, 0.5);
-    background: rgba(255, 255, 255, 0.15);
-    outline: none;
-}
-
-.row input::placeholder {
-    color: #a0a0c0;
-}
-
-.row button {
+input,
+button {
     width: 100%;
     padding: 14px;
-    font-size: 16px;
-    color: #ffffff;
-    background: linear-gradient(90deg, #007bff, #00ddeb);
-    border: none;
-    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: border-color var(--transition-speed), background-color var(--transition-speed);
+}
+
+input::placeholder {
+    color: var(--text-secondary);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: #2a2a2e;
+}
+
+button {
     cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.4s ease;
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
-}
-
-.row button:active,
-.row button:hover {
-    background: linear-gradient(90deg, #0056b3, #00b7c3);
-    box-shadow: 0 6px 20px rgba(0, 183, 195, 0.6);
-    transform: scale(1.02);
-}
-
-.message {
-    margin-top: 20px;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     font-weight: 500;
-    color: #00ffcc;
-    text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+    color: #fff;
+}
+
+@media (hover: hover) {
+    button:hover {
+        filter: brightness(1.15);
+    }
 }
 
 @media (max-width: 480px) {
     .container {
         padding: 25px;
-        width: 80%;
-        margin: 10px auto;
-        border-radius: 15px;
     }
 
     h1 {
-        font-size: 32px;
-        letter-spacing: 1.5px;
+        font-size: 1.5rem;
     }
 
     h2 {
-        font-size: 16px;
+        font-size: 0.9rem;
     }
 
-    .row input {
-        padding: 12px 15px;
-        font-size: 14px;
-    }
-
-    .row button {
+    input,
+    button {
         padding: 12px;
-        font-size: 14px;
+        font-size: 0.95rem;
     }
 }
