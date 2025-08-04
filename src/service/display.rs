@@ -1,7 +1,7 @@
+use crate::{error::AppError, module::led::SharedAmPmIndicator};
 use esp_idf_svc::hal::gpio::OutputPin;
 
-use crate::{error::AppError, module::led::SharedAmPmIndicator};
-
+/// Defines the service for controlling a 7-segment display.
 pub trait SevenSegmentDisplayService {
     fn init(&mut self) -> Result<(), AppError>;
     fn write(&mut self, message: [u8; 4]) -> Result<(), AppError>;

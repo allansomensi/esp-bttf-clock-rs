@@ -19,7 +19,7 @@ A feature-rich **ESP32** clock and lamp built using **Rust** and the `esp-idf` f
 - **Rust** toolchain (recommended: nightly version).
 - **Node.js** for Captive and Web Portals.
 - **Just** for utility scripts (see [Install Just](https://github.com/casey/just#installation)).
-- **ESP-IDF** environment properly set up (see [ESP-RS setup](https://docs.esp-rs.org/book/installation/index.html)).
+- **ESP-IDF** environment properly set up (see [ESP-RS setup](https://docs.espressif.com/projects/rust/book/installation/index.html)).
 - **ESP32 D1-mini** development board.
 
 ### 🔧 Development Setup
@@ -56,6 +56,7 @@ The ESP32 D1-mini does not support 5GHz Wi-Fi networks, as it only operates on t
 ### 🚦 Captive Portal Not Redirecting Automatically
 If the login notification to connect to the network does not appear and you are not automatically redirected to the Wi-Fi setup page, manually enter the following URL in your browser:
 `http://{{ip_address}}`
+
 By default, the Access Point IP address is **192.168.71.1**.
 
 ### 🌍 Web Portal Not Accessible

@@ -25,7 +25,6 @@ static CAPTIVE_PORTAL_JS: &str = include_str!("../../web/captive_portal/dist/ass
 /// they try to access network connectivity check URLs.
 ///
 /// ## Behavior
-///
 /// - Serves an HTML page at the root (`"/"`) URL to allow users to enter Wi-Fi
 ///   credentials.
 /// - Accepts a JSON payload via `POST /set_config` containing Wi-Fi
@@ -35,16 +34,14 @@ static CAPTIVE_PORTAL_JS: &str = include_str!("../../web/captive_portal/dist/ass
 /// - Supports automatic redirection to the captive portal page.
 ///
 /// ## Returns
-///
 /// - `Ok(())` if the portal is successfully initialized and credentials are
 ///   received.
 /// - `Err(AppError)` if server creation fails.
 ///
 /// ## Example
-///
 /// ```rust
 /// if let Err(e) = start_captive_portal() {
-///     eprintln!("Failed to start captive portal: {:?}", e);
+///     eprintln!("Failed to start captive portal: {e:?}");
 /// }
 /// ```
 pub fn start_captive_portal() -> Result<(), AppError> {

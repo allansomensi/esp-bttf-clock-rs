@@ -20,9 +20,6 @@ pub fn get_sntp() -> Result<EspSntp<'static>, AppError> {
 
 /// Synchronizes the device's time with an SNTP server.
 ///
-/// This function blocks the execution until the time synchronization is
-/// completed.
-///
 /// ## Arguments
 /// - `sntp`: A reference to the [Sntp] client that manages the synchronization
 ///   process.

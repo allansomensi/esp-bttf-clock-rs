@@ -39,6 +39,16 @@ pub fn get_hour_min() -> Vec<u8> {
     time_digits.into()
 }
 
+/// Retrieves the current year as a 4-digit vector.
+///
+/// ## Returns
+/// A `Vec<u8>` with 4 bytes, each representing a digit of the year.
+///
+/// ## Example
+/// ```rust
+/// let year_digits = get_year();
+/// println!("Year digits: {year_digits:?}");
+/// ```
 pub fn get_year() -> Vec<u8> {
     let timezone = tz::get_timezone();
     let now_utc: DateTime<Utc> = SystemTime::now().into();
@@ -56,6 +66,16 @@ pub fn get_year() -> Vec<u8> {
     year_digits.into()
 }
 
+/// Retrieves the current day of the month and month number.
+///
+/// ## Returns
+/// A tuple `(day, month)` where both are `u8`.
+///
+/// ## Example
+/// ```rust
+/// let (day, month) = get_day_month();
+/// println!("Day: {day}, Month: {month}");
+/// ```
 pub fn get_day_month() -> (u8, u8) {
     let timezone = tz::get_timezone();
     let now_utc: DateTime<Utc> = SystemTime::now().into();
@@ -70,7 +90,7 @@ pub fn get_day_month() -> (u8, u8) {
 
 /// Calculates the time remaining until the next minute.
 ///
-/// Returns a `Duration` representing the time to wait until the next exact
+/// Returns a [`Duration`] representing the time to wait until the next exact
 /// minute.
 pub fn calculate_time_until_next_minute() -> Duration {
     let timezone = tz::get_timezone();

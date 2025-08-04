@@ -27,12 +27,8 @@ pub struct WifiCredentials {
     pub password: String,
 }
 
-/// Initializes a [WifiDriver] instance with the provided modem, event loop, and
-/// optional NVS partition.
-///
-/// This function creates a new [WifiDriver] instance using the provided
-/// peripheral modem, system event loop, and optional NVS partition for storing
-/// settings. It is used to set up Wi-Fi functionality on the device.
+/// Initializes a [`WifiDriver`] instance with the provided modem, event loop,
+/// and optional NVS partition.
 ///
 /// ## Arguments
 /// - `modem`: The Wi-Fi modem peripheral to use.
@@ -41,15 +37,17 @@ pub struct WifiCredentials {
 ///   settings.
 ///
 /// ## Returns
-/// - `Result<WifiDriver<'d>, AppError>`: Returns the configured [WifiDriver]
-///   instance on success or an error.
+/// - `Ok(WifiDriver<'d>)`: Returns the configured [`WifiDriver`] instance on
+///   success.
+/// - `Err(AppError)`: Returns an [`AppError`] if the Wi-Fi driver fails to
+///   initialize.
 ///
 /// ## Example
 /// ```rust
 /// let wifi_driver = get_wifi(modem, sysloop, nvs);
 /// match wifi_driver {
 ///     Ok(driver) => println!("Wi-Fi driver initialized successfully!"),
-///     Err(e) => eprintln!("Error initializing Wi-Fi driver: {:?}", e),
+///     Err(e) => eprintln!("Error initializing Wi-Fi driver: {e:?}"),
 /// }
 /// ```
 pub fn get_wifi<'d, M>(

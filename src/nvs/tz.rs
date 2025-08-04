@@ -9,17 +9,14 @@ impl AppStorageTzService for AppStorage {
     /// Saves the provided timezone information to NVS storage.
     ///
     /// ## Arguments
-    ///
-    /// * `tz_nvs` - A mutable reference to the ESP NVS storage.
-    /// * `timezone` - A [TimezoneRequest] containing the timezone string.
+    /// - `tz_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `timezone` - A [TimezoneRequest] containing the timezone string.
     ///
     /// ## Behavior
-    ///
     /// Stores the provided timezone under the key `"tz_info"`. If the operation
     /// succeeds, logs a success message; otherwise, logs an error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut tz_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// save_timezone(
@@ -44,23 +41,19 @@ impl AppStorageTzService for AppStorage {
     /// Retrieves the stored timezone from NVS, if available.
     ///
     /// ## Arguments
-    ///
-    /// * `tz_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `tz_nvs` - A mutable reference to the ESP NVS storage.
     ///
     /// ## Returns
-    ///
-    /// * `Ok(Some(String))` - If a timezone is found and successfully
+    /// - `Ok(Some(String))` - If a timezone is found and successfully
     ///   retrieved.
-    /// * `Ok(None)` - If no timezone is stored.
-    /// * `Err(String)` - If an error occurs during retrieval.
+    /// - `Ok(None)` - If no timezone is stored.
+    /// - `Err(String)` - If an error occurs during retrieval.
     ///
     /// ## Behavior
-    ///
-    /// Attempts to fetch the stored timezone from the `"tz_info"` key. If
-    /// retrieval fails, returns an error message.
+    /// Attempts to fetch the stored timezone from the `tz_info` key.
+    /// If retrieval fails, returns an error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut tz_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// match get_maybe_timezone(&mut tz_nvs) {
@@ -83,17 +76,14 @@ impl AppStorageTzService for AppStorage {
     /// Deletes the stored timezone information from NVS.
     ///
     /// ## Arguments
-    ///
-    /// * `tz_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `tz_nvs` - A mutable reference to the ESP NVS storage.
     ///
     /// ## Behavior
-    ///
-    /// Removes the stored timezone information under the `"tz_info"` key.
+    /// Removes the stored timezone information under the `tz_info` key.
     /// If the operation succeeds, logs a success message; otherwise, logs an
     /// error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut tz_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// delete_timezone(&mut tz_nvs);

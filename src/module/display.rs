@@ -12,7 +12,7 @@ use esp_idf_svc::hal::{
 use std::sync::{Arc, Mutex};
 use tm1637::TM1637;
 
-/// A thread-safe shared `SevenSegmentDisplay` using `Arc<Mutex<...>>`.
+/// A thread-safe shared [`SevenSegmentDisplay`] using `Arc<Mutex<...>>`.
 pub type SharedSevenSegmentDisplay<'a, CLK, DIO> = Arc<Mutex<SevenSegmentDisplay<'a, CLK, DIO>>>;
 
 /// Centralizes the logic for controlling a seven-segment display.
@@ -20,12 +20,14 @@ pub struct SevenSegmentDisplay<'a, CLK: OutputPin, DIO: IOPin> {
     tm1637: TM1637<'a, PinDriver<'a, CLK, Output>, PinDriver<'a, DIO, InputOutput>, Ets>,
 }
 
+/// Groups together the shared instances of the seven-segment displays.
 pub struct DisplayGroup<'a, CLK: OutputPin, DateDIO: IOPin, YearDIO: IOPin, HourDIO: IOPin> {
     pub date: SharedSevenSegmentDisplay<'a, CLK, DateDIO>,
     pub year: SharedSevenSegmentDisplay<'a, CLK, YearDIO>,
     pub hour: SharedSevenSegmentDisplay<'a, CLK, HourDIO>,
 }
 
+/// A type alias for a thread-safe, shared group of seven-segment displays.
 pub type SharedDisplayGroup<'a, CLK, DateDIO, YearDIO, HourDIO> =
     Arc<Mutex<DisplayGroup<'static, CLK, DateDIO, YearDIO, HourDIO>>>;
 
@@ -34,14 +36,7 @@ where
     CLK: OutputPin,
     DIO: IOPin,
 {
-    /// Creates a new `SevenSegmentDisplay` instance.
-    ///
-    /// Creates the TM1637-based seven-segment display by
-    /// setting up the clock (CLK) and data (DIO) pins, configuring them
-    /// appropriately, and creating a thread-safe shared instance
-    /// of the underlying `TM1637` driver. The function ensures proper memory
-    /// management by leaking the boxed pin and delay drivers to provide
-    /// static references required by the `TM1637` struct.
+    /// Creates a new [`SevenSegmentDisplay`] instance.
     ///
     /// ## Arguments
     /// - `clk`: The GPIO pin used for the clock signal.
@@ -80,11 +75,6 @@ where
     /// Initializes the [SevenSegmentDisplay] by setting up the display and
     /// configuring the brightness.
     ///
-    /// This function locks the underlying `TM1637` driver to initialize the
-    /// display and set its brightness to a predefined level. It also writes
-    /// an initialization message to the display to signal that the setup is
-    /// complete.
-    ///
     /// ## Returns
     /// - `Ok(())`: If the display is successfully initialized and the message
     ///   is written.
@@ -105,10 +95,6 @@ where
     }
 
     /// Writes a 4-byte message to the seven-segment display.
-    ///
-    /// This function locks the underlying `TM1637` driver, clears the display,
-    /// and then writes the provided message in raw format starting from the
-    /// first digit.
     ///
     /// ## Arguments
     /// - `message`: A fixed-size array of 4 bytes representing the digits or
@@ -133,12 +119,8 @@ where
 
     /// Sets the brightness level of the seven-segment display.
     ///
-    /// This function locks the underlying `TM1637` driver and updates the
-    /// display brightness to the specified level.
-    ///
     /// ## Arguments
-    /// - `level`: The brightness level (typically from 0 to 7, depending on the
-    ///   TM1637 driver).
+    /// - `level`: The brightness level (0-7).
     ///
     /// ## Returns
     /// - `Ok(())`: If the brightness is successfully updated.
@@ -156,11 +138,6 @@ where
 
     /// Updates the display to show the current time.
     ///
-    /// This function retrieves the current time, converts the digits into the
-    /// corresponding seven-segment display format, and writes them to the
-    /// display. The colon separator (dot on the second digit) is enabled to
-    /// represent time correctly.
-    ///
     /// ## Returns
     /// - `Ok(())`: If the time is successfully retrieved and displayed.
     /// - `Err(AppError)`: An error if retrieving the time or updating the
@@ -169,7 +146,7 @@ where
     /// ## Example
     /// ```rust
     /// display
-    ///     .update_display_time()
+    ///     .update_display_time(am_pm_indicator)
     ///     .expect("Failed to update time on display");
     /// ```
     fn update_display_hour<AM: OutputPin, PM: OutputPin>(
@@ -198,6 +175,19 @@ where
         Ok(())
     }
 
+    /// Updates the display to show the current year.
+    ///
+    /// ## Returns
+    /// - `Ok(())`: If the year is successfully retrieved and displayed.
+    /// - `Err(AppError)`: An error if retrieving the year or updating the
+    ///   display fails.
+    ///
+    /// ## Example
+    /// ```rust
+    /// display
+    ///     .update_display_year()
+    ///     .expect("Failed to update year on display");
+    /// ```
     fn update_display_year(&mut self) -> Result<(), AppError> {
         let year = time::get_year();
 
@@ -213,6 +203,19 @@ where
         Ok(())
     }
 
+    /// Updates the display to show the current date.
+    ///
+    /// ## Returns
+    /// - `Ok(())`: If the date is successfully retrieved and displayed.
+    /// - `Err(AppError)`: An error if retrieving the date or updating the
+    ///   display fails.
+    ///
+    /// ## Example
+    /// ```rust
+    /// display
+    ///     .update_display_date()
+    ///     .expect("Failed to update date on display");
+    /// ```
     fn update_display_date(&mut self) -> Result<(), AppError> {
         let (day, month) = time::get_day_month();
 

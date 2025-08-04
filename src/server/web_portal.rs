@@ -151,7 +151,6 @@ impl WebPortal {
 /// response.
 ///
 /// ## Returns
-///
 /// A closure that handles an HTTP request and returns an HTML response
 /// with the content of the `web_portal.html` file.
 pub fn web_portal() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
@@ -191,7 +190,6 @@ pub fn web_portal_js() -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result
 /// actual time.
 ///
 /// ## Returns
-///
 /// A closure that handles the HTTP request and returns an HTML response with
 /// system status information.
 pub fn get_status(
@@ -222,12 +220,10 @@ pub fn get_status(
 /// saves the timezone data in NVS and responds with a success message.
 ///
 /// ## Arguments
-///
-/// * `tz_nvs` - A [Mutex] wrapping the [EspNvs] instance for storing the
-///   timezone data.
+/// - `tz_nvs` - A [Mutex] wrapping the [SharedAppStorage] instance for storing
+///   the timezone data.
 ///
 /// ## Returns
-///
 /// A closure that handles the HTTP request, validates the timezone, updates the
 /// system timezone, saves the data in NVS, and responds with a success message.
 pub fn set_timezone(
@@ -271,14 +267,12 @@ pub fn set_timezone(
 /// credentials and restarting the device.
 ///
 /// ## Behavior
-///
 /// - Deletes the stored Wi-Fi credentials from NVS.
 /// - Deletes the stored Timezone settings from NVS.
 /// - Disconnects from the current Wi-Fi network.
 /// - Restarts the ESP32 device.
 ///
 /// ## Returns
-///
 /// - A closure that can be used as an HTTP request handler.
 /// - This function does not return control after execution, as the device
 ///   restarts.
@@ -305,11 +299,9 @@ pub fn factory_reset(
 /// be between 0 and 7.
 ///
 /// ## Arguments
-///
-/// * `display` - A [SharedTm1637] display instance.
+/// - `display_group` - A [SharedDisplayGroup] instance.
 ///
 /// ## Returns
-///
 /// A closure that handles the HTTP request, updates the brightness, and returns
 /// a success message.
 pub fn set_brightness<'a, CLK, DateDIO, YearDIO, HourDIO>(
@@ -374,12 +366,11 @@ where
 /// synchronization is finished.
 ///
 /// ## Arguments
-///
-/// * `display` - A [SharedTm1637] display instance.
-/// * `sntp` - An instance of [Sntp] used to synchronize the time.
+/// - `display_group` - A [SharedDisplayGroup] instance.
+/// - `am_pm_indicator` - A [SharedAmPmIndicator] instance.
+/// - `sntp` - An instance of [EspSntp] used to synchronize the time.
 ///
 /// ## Returns
-///
 /// A closure that handles the HTTP request, synchronizes the time, updates the
 /// display, and returns a success message.
 pub fn sync_time<'a, CLK, DateDIO, YearDIO, HourDIO, AM, PM>(
@@ -436,14 +427,12 @@ where
 /// parameter.
 ///
 /// ## Arguments
-///
 /// - Reads the requested theme from the URL query parameter.
 /// - Sets the LED strip color based on the provided theme value.
 /// - Responds with `"Theme Updated!"` if successful.
 /// - Returns an error if the theme value is invalid.
 ///
 /// ## Returns
-///
 /// - A closure that acts as an HTTP request handler.
 pub fn set_theme(
     led_strip: SharedLedStrip,

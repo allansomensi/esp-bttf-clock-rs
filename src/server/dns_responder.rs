@@ -22,17 +22,14 @@ impl DnsResponder {
     /// responses.
     ///
     /// ## Arguments
-    ///
-    /// * `ip_address` - The IPv4 address to bind the DNS server to.
+    /// - `ip_address` - The IPv4 address to bind the DNS server to.
     ///
     /// ## Returns
-    ///
     /// Returns `Ok(Self)` if the socket is successfully created and
-    /// initialized, or an `Err(AppError)` if an error occurs during
+    /// initialized, or an [`AppError`] if an error occurs during
     /// initialization.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let dns_responder = DnsResponder::init(Ipv4Addr::from_str("192.168.71.1").unwrap())?;
     /// ```
@@ -58,16 +55,14 @@ impl DnsResponder {
     /// This function listens for DNS requests on the bound UDP socket,
     /// processes the requests, and sends a response back to the requesting
     /// client. The response includes the predefined IP address configured
-    /// in the `DnsResponder` instance. If the packet size exceeds 100
+    /// in the [`DnsResponder`] instance. If the packet size exceeds 100
     /// bytes, a warning is logged.
     ///
     /// ## Returns
-    ///
     /// Returns `Ok(())` if the request is successfully processed and responded
-    /// to, or an `Err(AppError)` if an error occurs while handling the request.
+    /// to, or an [`AppError`] if an error occurs while handling the request.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// dns_responder.handle_requests()?;
     /// ```

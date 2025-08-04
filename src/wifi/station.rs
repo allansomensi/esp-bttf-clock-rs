@@ -13,11 +13,6 @@ use esp_idf_svc::{
 
 /// Initializes the Wi-Fi station and connects to the specified network.
 ///
-/// This function sets up the Wi-Fi driver in station mode, configures it with
-/// the provided SSID and password, and starts the Wi-Fi connection process. It
-/// returns a [BlockingWifi] instance wrapped in [EspWifi], which can be used
-/// for blocking Wi-Fi operations.
-///
 /// ## Arguments
 /// - `modem`: The Wi-Fi modem peripheral to use.
 /// - `sysloop`: The system event loop for managing events.
@@ -26,8 +21,11 @@ use esp_idf_svc::{
 /// - `password`: The password for the Wi-Fi network.
 ///
 /// ## Returns
-/// - `Result<BlockingWifi<EspWifi<'d>>, AppError>`: A wrapped [BlockingWifi]
-///   instance on success or an error.
+/// - `Ok(BlockingWifi<EspWifi<'d>>)`: Returns a [`BlockingWifi`] instance on
+///   success. This wrapped Wi-Fi driver is configured in station mode and
+///   connected to the network.
+/// - `Err(AppError)`: Returns an [`AppError`] if the Wi-Fi station fails to
+///   initialize or connect.
 ///
 /// ## Example
 /// ```rust
@@ -36,7 +34,7 @@ use esp_idf_svc::{
 /// let wifi = get_station(modem, sysloop, nvs, ssid, password);
 /// match wifi {
 ///     Ok(wifi) => println!("Wi-Fi connected successfully!"),
-///     Err(e) => eprintln!("Failed to connect to Wi-Fi: {:?}", e),
+///     Err(e) => eprintln!("Failed to connect to Wi-Fi: {e:?}"),
 /// }
 /// ```
 pub fn get_station<'d, M>(
@@ -59,20 +57,17 @@ where
 /// Configures the Wi-Fi driver for station mode with the specified SSID and
 /// password.
 ///
-/// This function sets up the Wi-Fi configuration for connecting to a Wi-Fi
-/// network in client mode. It uses the WPA2 Personal authentication method and
-/// sets the provided SSID and password.
-///
-/// # Arguments
+/// ## Arguments
 /// - `wifi`: The `WifiDriver` instance to configure.
 /// - `ssid`: The SSID of the Wi-Fi network.
 /// - `password`: The password for the Wi-Fi network.
 ///
-/// # Returns
-/// - `Result<EspWifi, AppError>`: The configured `EspWifi` instance on success
-///   or an error.
+/// ## Returns
+/// - `Ok(EspWifi)`: Returns a configured [`EspWifi`] instance on success. This
+///   instance is now ready to connect to the specified Wi-Fi network.
+/// - `Err(AppError)`: Returns an [`AppError`] if the configuration fails.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// let ssid = "MyNetwork".to_string();
 /// let password = "MyPassword".to_string();
@@ -102,27 +97,21 @@ fn configure_station(
     Ok(wifi)
 }
 
-/// Starts and connects to a Wi-Fi network using the provided `wifi` driver.
-///
-/// This function initializes the Wi-Fi connection, waits for the network
-/// interface to be up, and continuously checks for a successful connection. If
-/// the connection fails, it deletes stored Wi-Fi credentials, stops the Wi-Fi
-/// driver, and restarts the device.
+/// Starts and connects to a Wi-Fi network using the provided Wi-Fi driver.
 ///
 /// ## Arguments
-///
 /// - `wifi`: A mutable reference to the [BlockingWifi] driver that manages the
 ///   Wi-Fi connection.
 /// - `nvs`: A mutable reference to the NVS used to store Wi-Fi credentials.
 ///
-/// ## Errors
-/// This function will return an error if any of the following operations fail:
+/// ## Returns
+/// This function will return an [`AppError`] if any of the following operations
+/// fail:
 /// - Starting or connecting the Wi-Fi.
 /// - Waiting for the network interface to come up.
 /// - Connecting to the Wi-Fi network.
 ///
 /// ## Example
-///
 /// ```rust
 /// let mut wifi = ...; // A properly initialized wifi driver
 /// let mut nvs = ...;  // A properly initialized NVS
@@ -130,7 +119,7 @@ fn configure_station(
 /// connect_wifi(&mut wifi, &mut nvs)?;
 /// ```
 ///
-/// # Safety
+/// ## Safety
 /// This function uses `unsafe` to restart the device if the connection process
 /// fails.
 pub fn connect_wifi_or_restart(

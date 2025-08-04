@@ -17,10 +17,10 @@ impl AppTheme for LedStrip<'_> {
     /// Sets the LED strip to a predefined color theme.
     ///
     /// ## Arguments
-    /// - `theme`: The [LedStripTheme] to apply to the LEDs.
+    /// - `theme`: The [Theme] to apply to the LEDs.
     ///
     /// ## Returns
-    /// A `Result` indicating success or an `AppError` on failure.
+    /// A `Result` indicating success or an [`AppError`] on failure.
     fn apply_theme(&mut self, theme: &Theme) -> Result<(), AppError> {
         let brightness = 0.25;
 
@@ -196,7 +196,7 @@ impl LedStrip<'_> {
     /// ## Arguments
     /// - `channel`: The RMT channel to use for LED communication (implements
     ///   [Peripheral] + [RmtChannel]).
-    /// - `dio`: The data pin for the LED strip (implements [IOPin]).
+    /// - `dio`: The data pin for the LED strip (implements [OutputPin]).
     /// - `num_leds`: The number of LEDs in the strip.
     ///
     /// ## Returns
@@ -204,7 +204,7 @@ impl LedStrip<'_> {
     /// [AppError] on failure.
     ///
     /// ## Example
-    /// ```
+    /// ```rust
     /// let led_strip = LedStrip::new(channel, dio, 7).expect("Failed to create LED strip");
     /// ```
     pub fn new<C, DIO>(channel: C, dio: DIO, num_leds: u8) -> Result<Self, AppError>

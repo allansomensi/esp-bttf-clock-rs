@@ -2,14 +2,6 @@ use std::sync::{Arc, Mutex};
 
 /// Represents a request to set or retrieve a timezone.
 ///
-/// This struct is used to deserialize incoming requests containing a timezone
-/// value as a string. It is typically used to handle requests to set or update
-/// the timezone of a system or device.
-///
-/// ## Fields
-/// * `timezone` - A string representing the desired timezone, e.g.,
-///   `"America/New_York"`.
-///
 /// ## Example
 /// ```rust
 /// let timezone_request: TimezoneRequest =
@@ -26,11 +18,6 @@ lazy_static::lazy_static! {
 
 /// Retrieves the current timezone, either from the global [TIMEZONE] or the
 /// default environment value.
-///
-/// This function checks if a timezone has been set in the global [TIMEZONE]
-/// variable. If a timezone is set, it returns that timezone as a string.
-/// Otherwise, it returns the default timezone defined by the `DEFAULT_TIMEZONE`
-/// environment variable.
 ///
 /// ## Returns
 /// A string representing the current timezone.
@@ -53,7 +40,7 @@ pub fn get_timezone() -> String {
 /// value.
 ///
 /// ## Arguments
-/// * `new_timezone` - A string representing the new timezone.
+/// - `new_timezone` - A string representing the new timezone.
 ///
 /// ## Example
 /// ```rust

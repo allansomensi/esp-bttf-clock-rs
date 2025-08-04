@@ -9,6 +9,8 @@ pub mod wifi;
 
 pub type SharedAppStorage = Arc<Mutex<AppStorage>>;
 
+/// Serves as a centralized container for managing different types of data
+/// stored in NVS.
 pub struct AppStorage {
     pub wifi_nvs: EspNvs<NvsDefault>,
     pub tz_nvs: EspNvs<NvsDefault>,

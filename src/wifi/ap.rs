@@ -1,5 +1,3 @@
-use std::{net::Ipv4Addr, str::FromStr};
-
 use super::get_wifi;
 use crate::error::AppError;
 use esp_idf_svc::{
@@ -13,6 +11,7 @@ use esp_idf_svc::{
         EspWifi, WifiDriver,
     },
 };
+use std::{net::Ipv4Addr, str::FromStr};
 
 pub const AP_IP_ADDRESS: &str = env!("AP_IP_ADDRESS");
 const AP_SSID: &str = env!("AP_SSID");
@@ -58,7 +57,7 @@ where
 /// This function sets up the Wi-Fi module in Access Point mode with the
 /// following configuration:
 /// - SSID: [AP_SSID]
-/// - Password: [AP_PASS]
+/// - Password: [AP_PASSWORD]
 /// - Authentication: WPA2-Personal
 /// - Maximum number of connections: 4
 /// - IP configuration: [AP_IP_ADDRESS]

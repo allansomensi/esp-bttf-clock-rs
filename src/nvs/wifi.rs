@@ -8,19 +8,16 @@ impl AppStorageWifiService for AppStorage {
     /// Saves Wi-Fi credentials to NVS storage.
     ///
     /// ## Arguments
-    ///
-    /// * `wifi_nvs` - A mutable reference to the ESP NVS storage.
-    /// * `ssid` - The Wi-Fi SSID as a `String`.
-    /// * `password` - The Wi-Fi password as a `String`.
+    /// - `wifi_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `ssid` - The Wi-Fi SSID as a `String`.
+    /// - `password` - The Wi-Fi password as a `String`.
     ///
     /// ## Behavior
-    ///
-    /// Stores the provided SSID and password under the key `"net_info"`.
+    /// Stores the provided SSID and password under the key `net_info`.
     /// If the operation succeeds, logs a success message; otherwise, logs an
     /// error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut wifi_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// save_wifi_credentials(
@@ -45,25 +42,21 @@ impl AppStorageWifiService for AppStorage {
     /// Retrieves stored Wi-Fi credentials from NVS, if available.
     ///
     /// ## Arguments
-    ///
-    /// * `wifi_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `wifi_nvs` - A mutable reference to the ESP NVS storage.
     ///
     /// ## Returns
-    ///
-    /// * `Ok(Some(WifiCredentials))` - If credentials are found and
+    /// - `Ok(Some(WifiCredentials))` - If credentials are found and
     ///   successfully deserialized.
-    /// * `Ok(None)` - If no credentials are stored.
-    /// * `Err(String)` - If an error occurs during retrieval or
+    /// - `Ok(None)` - If no credentials are stored.
+    /// - `Err(String)` - If an error occurs during retrieval or
     ///   deserialization.
     ///
     /// ## Behavior
-    ///
     /// Attempts to fetch and deserialize Wi-Fi credentials from the
-    /// `"net_info"` key. If retrieval or deserialization fails, returns an
+    /// `net_info` key. If retrieval or deserialization fails, returns an
     /// error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut wifi_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// match get_maybe_wifi_credentials(&mut wifi_nvs) {
@@ -96,17 +89,14 @@ impl AppStorageWifiService for AppStorage {
     /// Deletes stored Wi-Fi credentials from NVS.
     ///
     /// ## Arguments
-    ///
-    /// * `wifi_nvs` - A mutable reference to the ESP NVS storage.
+    /// - `wifi_nvs` - A mutable reference to the ESP NVS storage.
     ///
     /// ## Behavior
-    ///
-    /// Removes the Wi-Fi credentials stored under the `"net_info"` key.
+    /// Removes the Wi-Fi credentials stored under the `net_info` key.
     /// If the operation succeeds, logs a success message; otherwise, logs an
     /// error message.
     ///
     /// ## Example
-    ///
     /// ```rust
     /// let mut wifi_nvs = initialize_nvs(); // Assume this function initializes NVS.
     /// delete_wifi_credentials(&mut wifi_nvs);

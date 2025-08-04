@@ -1,3 +1,4 @@
+use crate::module::display::{DisplayGroup, SharedDisplayGroup};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, gpio::OutputPin, peripheral::Peripheral, prelude::Peripherals},
@@ -15,8 +16,6 @@ use service::{
 use std::{net::Ipv4Addr, str::FromStr, sync::Mutex, time::Duration};
 use theme::{AppTheme, Theme};
 use wifi::ap::AP_IP_ADDRESS;
-
-use crate::module::display::{DisplayGroup, SharedDisplayGroup};
 
 mod error;
 mod module;
