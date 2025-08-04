@@ -1,7 +1,7 @@
 [package]
 name = "esp-bttf-clock-rs"
 version = "0.1.0"
-authors = ["allansomensi <allansomensidev@gmail.com>"]
+authors = ["allansomensi <allansomensidev@proton.me>"]
 description = "A clock/lamp built with ESP32, using Rust and the esp-idf framework. It connects to Wi-Fi to synchronize time via SNTP."
 homepage = "https://github.com/allansomensi/esp-bttf-clock-rs"
 repository = "https://github.com/allansomensi/esp-bttf-clock-rs"
