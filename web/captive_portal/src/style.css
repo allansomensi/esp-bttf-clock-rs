@@ -4,7 +4,9 @@
     --bg-light: #1e1e1e;
     --text-primary: #f0f0f0;
     --text-secondary: #a0a0a0;
+    --text-tertiary: #606060;
     --border-color: #333333;
+    --error-color: #dc3545;
     --transition-speed: 0.2s;
 }
 
@@ -15,11 +17,12 @@
 }
 
 body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     background: var(--bg-dark);
     color: var(--text-primary);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
@@ -33,6 +36,8 @@ body {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     text-align: center;
+    margin-bottom: 30px;
+    margin-top: -80px;
 }
 
 h1 {
@@ -53,7 +58,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Remove a margem do último elemento para um espaçamento mais limpo */
 .row:last-child {
     margin-bottom: 0;
 }
@@ -63,12 +67,13 @@ button {
     width: 100%;
     padding: 14px;
     font-size: 1rem;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     color: var(--text-primary);
     background-color: var(--bg-dark);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    transition: border-color var(--transition-speed), background-color var(--transition-speed);
+    transition: border-color var(--transition-speed),
+        background-color var(--transition-speed);
 }
 
 input::placeholder {
@@ -89,6 +94,44 @@ button {
     color: #fff;
 }
 
+.error-message {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    text-align: left;
+}
+
+.tutorial-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: transparent;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: left;
+    color: var(--text-tertiary);
+}
+
+.tutorial-container h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+}
+
+.tutorial-container ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tutorial-container ul li {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.tutorial-container ul li:last-child {
+    margin-bottom: 0;
+}
+
 @media (hover: hover) {
     button:hover {
         filter: brightness(1.15);
@@ -98,6 +141,7 @@ button {
 @media (max-width: 480px) {
     .container {
         padding: 25px;
+        margin-top: -40px;
     }
 
     h1 {
@@ -112,5 +156,18 @@ button {
     button {
         padding: 12px;
         font-size: 0.95rem;
+    }
+
+    .tutorial-container {
+        padding: 15px;
+        text-align: center;
+    }
+
+    .tutorial-container h3 {
+        font-size: 1.25rem;
+    }
+
+    .tutorial-container ul li {
+        font-size: 1rem;
     }
 }
