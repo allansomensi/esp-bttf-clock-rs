@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a question
+    about: |
+      Feel free to ask any questions or share discussions about esp-bttf-clock-rs.
+    url: https://github.com/allansomensi/esp-bttf-clock-rs/discussions/new
