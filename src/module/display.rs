@@ -1,6 +1,7 @@
 use super::led::SharedAmPmIndicator;
 use crate::{
     error::AppError,
+    prefs::hour_format::HourFormat,
     service::{display::SevenSegmentDisplayService, led::AmPmIndicatorService},
     time,
     util::{messages::DisplayMessage, DISPLAY_DIGIT},
@@ -136,40 +137,72 @@ where
         Ok(())
     }
 
-    /// Updates the display to show the current time.
+    /// Updates the hour and minute display based on the selected hour format.
+    ///
+    /// ## Arguments
+    /// - `am_pm_indicator`: A shared reference to the `AmPmIndicator` service
+    ///   used to control the AM and PM LEDs.
+    /// - `hour_format`: An enum [`HourFormat`] that determines whether the time
+    ///   is displayed in 12-hour or 24-hour format.
     ///
     /// ## Returns
-    /// - `Ok(())`: If the time is successfully retrieved and displayed.
-    /// - `Err(AppError)`: An error if retrieving the time or updating the
-    ///   display fails.
+    /// - `Ok(())`: If the time is successfully displayed and the AM/PM
+    ///   indicator is set.
+    /// - `Err(AppError)`: If writing to the display or controlling the LEDs
+    ///   fails.
     ///
     /// ## Example
     /// ```rust
+    /// let hour_format = prefs::hour_format::get_hour_format();
     /// display
-    ///     .update_display_time(am_pm_indicator)
-    ///     .expect("Failed to update time on display");
+    ///     .update_display_hour(am_pm_indicator.clone(), hour_format)
+    ///     .expect("Failed to update hour/min display");
     /// ```
     fn update_display_hour<AM: OutputPin, PM: OutputPin>(
         &mut self,
         am_pm_indicator: SharedAmPmIndicator<AM, PM>,
+        hour_format: HourFormat,
     ) -> Result<(), AppError> {
-        let time = time::get_hour_min();
+        let time_24h = time::get_hour_min();
 
-        let digits = [
-            DISPLAY_DIGIT[time[0] as usize],
-            DISPLAY_DIGIT[time[1] as usize] | 0b10000000,
-            DISPLAY_DIGIT[time[2] as usize],
-            DISPLAY_DIGIT[time[3] as usize],
-        ];
+        match hour_format {
+            HourFormat::Twelve => {
+                let hour = time_24h[0] * 10 + time_24h[1];
 
-        self.write([digits[0], digits[1], digits[2], digits[3]])?;
+                let display_hour = match hour {
+                    0 => 12,
+                    1..=12 => hour,
+                    _ => hour - 12,
+                };
 
-        let hour = time[0] * 10 + time[1];
+                let digits = [
+                    DISPLAY_DIGIT[(display_hour / 10) as usize],
+                    DISPLAY_DIGIT[(display_hour % 10) as usize] | 0b10000000,
+                    DISPLAY_DIGIT[time_24h[2] as usize],
+                    DISPLAY_DIGIT[time_24h[3] as usize],
+                ];
 
-        if hour < 12 {
-            am_pm_indicator.lock().unwrap().set_am()?;
-        } else {
-            am_pm_indicator.lock().unwrap().set_pm()?;
+                self.write(digits)?;
+
+                if hour < 12 {
+                    am_pm_indicator.lock().unwrap().set_am()?;
+                } else {
+                    am_pm_indicator.lock().unwrap().set_pm()?;
+                }
+            }
+
+            HourFormat::TwentyFour => {
+                let digits = [
+                    DISPLAY_DIGIT[time_24h[0] as usize],
+                    DISPLAY_DIGIT[time_24h[1] as usize] | 0b10000000,
+                    DISPLAY_DIGIT[time_24h[2] as usize],
+                    DISPLAY_DIGIT[time_24h[3] as usize],
+                ];
+
+                self.write(digits)?;
+
+                am_pm_indicator.lock().unwrap().clear()?;
+            }
         }
 
         Ok(())

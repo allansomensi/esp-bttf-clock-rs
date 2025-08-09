@@ -1,9 +1,10 @@
-use crate::error::AppError;
+use crate::{error::AppError, nvs::prefs::PREFS_NAMESPACE};
 use esp_idf_svc::nvs::{EspNvs, EspNvsPartition, NvsDefault};
 use std::sync::{Arc, Mutex};
 use tz::TZ_NAMESPACE;
 use wifi::WIFI_NAMESPACE;
 
+pub mod prefs;
 pub mod tz;
 pub mod wifi;
 
@@ -14,6 +15,7 @@ pub type SharedAppStorage = Arc<Mutex<AppStorage>>;
 pub struct AppStorage {
     pub wifi_nvs: EspNvs<NvsDefault>,
     pub tz_nvs: EspNvs<NvsDefault>,
+    pub prefs_nvs: EspNvs<NvsDefault>,
 }
 
 impl AppStorage {
@@ -38,7 +40,20 @@ impl AppStorage {
             Err(e) => panic!("Could't get tz namespace {e:?}"),
         };
 
-        let app_storage = Self { wifi_nvs, tz_nvs };
+        // Initialize Prefs NVS
+        let prefs_nvs = match EspNvs::new(nvs_default_partition.clone(), PREFS_NAMESPACE, true) {
+            Ok(nvs) => {
+                log::info!("Got namespace {PREFS_NAMESPACE} from default partition");
+                nvs
+            }
+            Err(e) => panic!("Could't get prefs namespace {e:?}"),
+        };
+
+        let app_storage = Self {
+            wifi_nvs,
+            tz_nvs,
+            prefs_nvs,
+        };
 
         Ok(SharedAppStorage::new(app_storage.into()))
     }

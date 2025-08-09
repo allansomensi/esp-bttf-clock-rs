@@ -1,4 +1,8 @@
-use crate::module::display::{DisplayGroup, SharedDisplayGroup};
+use crate::{
+    module::display::{DisplayGroup, SharedDisplayGroup},
+    prefs::hour_format::{get_hour_format, HourFormat},
+    service::app_storage::AppStoragePrefsService,
+};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{delay::FreeRtos, gpio::OutputPin, peripheral::Peripheral, prelude::Peripherals},
@@ -20,6 +24,7 @@ use wifi::ap::AP_IP_ADDRESS;
 mod error;
 mod module;
 mod nvs;
+mod prefs;
 mod server;
 mod service;
 mod theme;
@@ -215,6 +220,13 @@ fn main() -> Result<(), error::AppError> {
         time::tz::set_timezone(env!("DEFAULT_TIMEZONE").to_string());
     }
 
+    // Read hour_format from NVS
+    let hour_format = app_storage.lock().unwrap().get_maybe_hour_format();
+
+    if let Some(hour_format) = hour_format.unwrap_or(Some(HourFormat::default())) {
+        prefs::hour_format::set_hour_format(hour_format);
+    }
+
     // Set the LED strip theme to default
     led_strip.apply_theme(&Theme::default())?;
 
@@ -244,6 +256,8 @@ fn main() -> Result<(), error::AppError> {
     std::thread::spawn(move || loop {
         let wait_time = time::calculate_time_until_next_minute();
 
+        let hour_format = get_hour_format();
+
         date_display
             .lock()
             .unwrap()
@@ -265,7 +279,7 @@ fn main() -> Result<(), error::AppError> {
         hour_display
             .lock()
             .unwrap()
-            .update_display_hour(am_pm_indicator.clone())
+            .update_display_hour(am_pm_indicator.clone(), hour_format)
             .inspect_err(|e| {
                 log::error!("Failed to update hour/min display: {e:#?}");
             })

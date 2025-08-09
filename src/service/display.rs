@@ -1,4 +1,4 @@
-use crate::{error::AppError, module::led::SharedAmPmIndicator};
+use crate::{error::AppError, module::led::SharedAmPmIndicator, prefs::hour_format::HourFormat};
 use esp_idf_svc::hal::gpio::OutputPin;
 
 /// Defines the service for controlling a 7-segment display.
@@ -9,6 +9,7 @@ pub trait SevenSegmentDisplayService {
     fn update_display_hour<AM: OutputPin, PM: OutputPin>(
         &mut self,
         am_pm_indicator: SharedAmPmIndicator<AM, PM>,
+        hour_format: HourFormat,
     ) -> Result<(), AppError>;
     fn update_display_year(&mut self) -> Result<(), AppError>;
     fn update_display_date(&mut self) -> Result<(), AppError>;

@@ -6,8 +6,9 @@ use crate::{
         led_strip::{LedStrip, SharedLedStrip},
     },
     nvs::SharedAppStorage,
+    prefs::{self, hour_format::get_hour_format},
     service::{
-        app_storage::{AppStorageTzService, AppStorageWifiService},
+        app_storage::{AppStoragePrefsService, AppStorageTzService, AppStorageWifiService},
         display::SevenSegmentDisplayService,
     },
     theme::{AppTheme, Theme},
@@ -108,6 +109,16 @@ impl WebPortal {
             )
             .inspect_err(|&e| {
                 log::error!("Failed to register set_timezone handler: {e:#?}");
+            })?;
+
+        self.server
+            .fn_handler(
+                "/set_hour_format",
+                Method::Get,
+                set_hour_format(app_storage.clone()),
+            )
+            .inspect_err(|&e| {
+                log::error!("Failed to register set_hour_format handler: {e:#?}");
             })?;
 
         self.server
@@ -263,6 +274,51 @@ pub fn set_timezone(
     }
 }
 
+/// Sets the hour format (12h or 24h).
+///
+/// This function extracts the hour format value from the URL query parameter
+/// (`0` for 12h, `1` for 24h). It validates the value, updates the
+/// application's in-memory state for immediate effect, and saves the preference
+/// to NVS for persistence across restarts.
+///
+/// ## Arguments
+/// - `storage` - A [SharedAppStorage] instance used to save the hour format
+///   setting to NVS.
+///
+/// ## Returns
+/// A closure that handles the HTTP request, validates the hour format from the
+/// URL, updates both the runtime state and persistent storage, and responds
+/// with a success message.
+pub fn set_hour_format(
+    storage: SharedAppStorage,
+) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), AppError> {
+    move |request: Request<&mut EspHttpConnection<'_>>| {
+        let url = request.uri();
+
+        if let Some(start) = url.find('?') {
+            let hour_format_value = &url[start + 1..];
+            if let Ok(hour_format) = hour_format_value.parse::<u8>() {
+                if (0..=1).contains(&hour_format) {
+                    storage
+                        .lock()
+                        .unwrap()
+                        .save_hour_format(hour_format.into())?;
+                    prefs::hour_format::set_hour_format(hour_format.into());
+                } else {
+                    log::warn!("Invalid hour_format: '{hour_format}'");
+                    return Err(AppError::Server("Invalid request".to_string()));
+                }
+            }
+        }
+
+        request
+            .into_ok_response()?
+            .write("Hour format changed!".as_bytes())?;
+
+        Ok::<(), AppError>(())
+    }
+}
+
 /// Creates an HTTP handler that performs a factory reset by deleting Wi-Fi
 /// credentials and restarting the device.
 ///
@@ -405,13 +461,15 @@ where
 
         while sntp.get_sync_status() != SyncStatus::Completed {}
 
+        let hour_format = get_hour_format();
+
         display_group
             .lock()
             .unwrap()
             .hour
             .lock()
             .unwrap()
-            .update_display_hour(am_pm_indicator.clone())?;
+            .update_display_hour(am_pm_indicator.clone(), hour_format)?;
 
         log::info!("Time sync completed!");
 
