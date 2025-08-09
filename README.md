@@ -8,6 +8,7 @@ A feature-rich **ESP32** clock and lamp built using **Rust** and the `esp-idf` f
 - 📡 **Captive Portal:** Simplifies Wi-Fi connection by automatically redirecting to the setup page.
 - 🔗 **mDNS Support:** Access the web portal easily using a hostname instead of an IP address.
 - 🎨 **Color Themes:** Multiple LED color themes for personalized aesthetics.
+- 🕛 **Time Format:** Supports both 24-hour and 12-hour (AM/PM) formats.
 - 🌍 **Dynamic Timezones:** Supports 500+ adjustable timezones.
 - 💾 **Persistent Storage:** Utilizes NVS (Non-Volatile Storage) for saving reusable settings.
 - 🔒 **Secure by Design:** Built with Rust and TypeScript, ensuring memory safety and type safety.
