@@ -17,3 +17,19 @@ export function factoryReset(): void {
             });
     }
 }
+
+export function handlePowerModeChange(): void {
+    const highPowerSwitch = document.getElementById(
+        "highPowerSwitch"
+    ) as HTMLInputElement;
+
+    if (highPowerSwitch.checked) {
+        if (
+            !confirm(
+                "Warning: To enable High Power Mode, a 5V power supply that provides at least 1.5A is recommended. Standard computer USB ports (which usually provide 0.5A) may not be sufficient, causing instability in the device. Do you wish to continue?"
+            )
+        ) {
+            highPowerSwitch.checked = false;
+        }
+    }
+}

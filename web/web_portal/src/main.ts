@@ -1,7 +1,7 @@
 import "./style.css";
 import { setDisplayBrightness } from "./display";
 import { populateTimezoneSelect, setTimezone, syncTime } from "./time";
-import { factoryReset } from "./sys";
+import { factoryReset, handlePowerModeChange } from "./sys";
 import { setTheme } from "./theme";
 import { setHourFormat } from "./prefs";
 import { fetchStatus } from "./status";
@@ -37,11 +37,16 @@ if (app) {
         "hourFormatSwitch"
     ) as HTMLInputElement;
 
+    const highPowerSwitch = document.getElementById(
+        "highPowerSwitch"
+    ) as HTMLInputElement;
+
     brightnessInput.value = "";
     themeSelect.value = "original";
 
     themeSelect.addEventListener("change", setTheme);
     hourFormatSwitch.addEventListener("change", setHourFormat);
+    highPowerSwitch.addEventListener("change", handlePowerModeChange);
 
     populateTimezoneSelect();
 
@@ -76,6 +81,17 @@ function createHTMLContent(): string {
                         <span class="slider"></span>
                     </label>
                     <span class="switch-label">24h</span>
+                </div>
+            </div>
+             <div class="row setting-row">
+                <span>High Power Mode</span>
+                <div class="switch-container">
+                    <span class="switch-label">Off</span>
+                    <label class="switch">
+                        <input type="checkbox" id="highPowerSwitch">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="switch-label">On</span>
                 </div>
             </div>
 
