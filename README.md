@@ -62,7 +62,7 @@ By default, the Access Point IP address is **192.168.71.1**.
 
 ### 🌍 Web Portal Not Accessible
 - ✅ Verify that the ESP32 is properly connected to the correct Wi-Fi network.
-- 🌐 If mDNS (`http://espclock.local`) is not working, first ensure that you are accessing it via **HTTP** and not HTTPS.
+- 🌐 If mDNS (`http://bttf.local`) is not working, first ensure that you are accessing it via **HTTP** and not HTTPS.
 - 🔍 If the issue persists, check your router settings to find the assigned IP address and use it directly.
 
 ### ⏳ Time Synchronization Fails

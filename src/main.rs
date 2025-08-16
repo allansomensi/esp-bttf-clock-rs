@@ -146,8 +146,8 @@ fn main() -> Result<(), error::AppError> {
 
     // Initialize mDNS
     let mut mdns = esp_idf_svc::mdns::EspMdns::take()?;
-    mdns.set_hostname("espclock")?;
-    mdns.set_instance_name("espclock")?;
+    mdns.set_hostname("bttf")?;
+    mdns.set_instance_name("bttf")?;
     mdns.add_service(None, "_http", "_tcp", 80, &[])?;
 
     // Initialize AM/PM leds
